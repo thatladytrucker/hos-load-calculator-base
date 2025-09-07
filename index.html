@@ -9,10 +9,17 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#0d1a26" />
 
-  <!-- Icons (files will live in /icons once you generate them) -->
-  <link rel="icon" type="image/png" sizes="180x180" href="icons/icon-180.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+  <!-- Icons (POINT TO YOUR ACTUAL FILE LOCATIONS) -->
+  <!-- Using the files you just downloaded to the repo root -->
+  <link rel="icon" type="image/png" sizes="180x180" href="hos-icon-180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="hos-icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="hos-icon-512.png">
+
+  <!-- iOS support (Safari ignores web manifest for icons) -->
+  <link rel="apple-touch-icon" href="hos-icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="HOS Calc">
 
   <link rel="stylesheet" href="styles.css" />
 </head>
