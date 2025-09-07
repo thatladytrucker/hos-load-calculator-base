@@ -1,0 +1,76 @@
+:root {
+  --bg1: #0d1a26;
+  --bg2: #1a3550;
+  --card: #0f2131;
+  --text: #e6f0ff;
+  --muted: #b9c9e1;
+  --accent: #ff6a00;
+  --ok: #18b36a;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--text);
+  background: radial-gradient(1200px 1200px at 50% 0%, var(--bg2), var(--bg1) 60%);
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+header { text-align: center; margin: 8px 0 24px; }
+h1 { margin: 0 0 6px 0; font-weight: 800; letter-spacing: 0.3px; }
+.tag {
+  display: inline-block; padding: 6px 10px; border-radius: 999px;
+  background: #0c1a28; color: var(--muted); font-size: 12px;
+  border: 1px solid #16324a;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid #16324a;
+  border-radius: 16px;
+  padding: 18px;
+  margin: 14px 0;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 12px 0 8px;
+}
+label { display: grid; gap: 6px; font-size: 14px; color: var(--muted); }
+input {
+  background: #0a1825; color: var(--text);
+  border: 1px solid #16324a; border-radius: 10px;
+  padding: 10px 12px; font-size: 15px;
+}
+
+button {
+  appearance: none; border: none; cursor: pointer;
+  background: linear-gradient(135deg, #ff7a1a, #ff6a00);
+  color: white; font-weight: 700; letter-spacing: 0.2px;
+  padding: 10px 16px; border-radius: 12px; margin-top: 6px;
+  box-shadow: 0 6px 14px rgba(255, 107, 0, 0.35);
+}
+button:hover { filter: brightness(1.05); }
+button:active { transform: translateY(1px); }
+
+.results {
+  background: #0a1825; border: 1px solid #16324a;
+  border-radius: 10px; padding: 12px; min-height: 68px;
+  overflow: auto; color: #d6e6ff; margin-top: 10px;
+}
+
+.steps { margin: 8px 0 6px; color: var(--muted); }
+.hint { color: var(--muted); font-size: 12px; margin-top: 8px; }
+
+.foot {
+  text-align: center; color: var(--muted);
+  font-size: 12px; margin-top: 18px;
+}
