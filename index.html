@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HOS Load Calculator — STARTING POINT</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0d1a26" />
+
+  <!-- Icons (files will live in /icons once you generate them) -->
+  <link rel="icon" type="image/png" sizes="180x180" href="icons/icon-180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>🚛 HOS Load Calculator</h1>
+      <p class="tag">MY STARTING POINT VERSION (baseline, clean)</p>
+    </header>
+
+    <!-- Placeholder UI (kept super simple on purpose) -->
+    <section class="card">
+      <h2>Quick Check (placeholder)</h2>
+      <div class="grid">
+        <label>
+          11-Hour Drive Used (h:mm)
+          <input id="driveUsed" type="text" placeholder="e.g., 5:30">
+        </label>
+        <label>
+          14-Hour Window Used (h:mm)
+          <input id="windowUsed" type="text" placeholder="e.g., 6:15">
+        </label>
+        <label>
+          70-Hour / 8-Day Used (h:mm)
+          <input id="cycleUsed" type="text" placeholder="e.g., 42:00">
+        </label>
+      </div>
+      <button id="calcBtn">Calculate (Placeholder)</button>
+      <pre id="results" class="results">Results will appear here…</pre>
+    </section>
+
+    <!-- Built-in Icon Maker (no Canva needed) -->
+    <section class="card">
+      <h2>Icon Maker (generate 180/192/512 PNGs)</h2>
+      <ol class="steps">
+        <li>Tap <strong>Choose Image</strong> and select your HOS icon image (the one you sent).</li>
+        <li>Click <strong>Generate Icons</strong>.</li>
+        <li>Three files will download: <code>icon-180.png</code>, <code>icon-192.png</code>, <code>icon-512.png</code>.</li>
+        <li>Create an <code>icons</code> folder in GitHub and upload those three files.</li>
+      </ol>
+      <input id="iconFile" type="file" accept="image/*">
+      <button id="makeIconsBtn">Generate Icons (180 / 192 / 512)</button>
+      <p class="hint">These sizes match PWA requirements. Transparent PNG recommended.</p>
+    </section>
+
+    <section class="card">
+      <h2>Install</h2>
+      <p>Once deployed (GitHub Pages or Netlify), open the site and “Add to Home Screen”. App runs in standalone mode and caches offline.</p>
+    </section>
+
+    <footer class="foot">
+      <p>⚠️ <strong>Disclaimer:</strong> For training & educational use only — not a legal logbook replacement.</p>
+      <p>© <span id="year"></span> Toya Cramsey</p>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
