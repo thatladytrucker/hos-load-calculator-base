@@ -1,81 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>HOS Load Calculator — STARTING POINT</title>
-
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#0d1a26" />
-
-  <!-- Icons (POINT TO YOUR ACTUAL FILE LOCATIONS) -->
-  <!-- Using the files you just downloaded to the repo root -->
-  <link rel="icon" type="image/png" sizes="180x180" href="hos-icon-180.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="hos-icon-192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="hos-icon-512.png">
-
-  <!-- iOS support (Safari ignores web manifest for icons) -->
-  <link rel="apple-touch-icon" href="hos-icon-180.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="HOS Calc">
-
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOS Load Calculator</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="container">
+
     <header>
-      <h1>🚛 HOS Load Calculator</h1>
-      <p class="tag">MY STARTING POINT VERSION (baseline, clean)</p>
+        <h1>HOS Load Calculator</h1>
+        <p>This app assists with trip planning. It is your job to follow all FMCSA and DOT rules and regulations as a CDL holder. The app assumes a full clock for every calculation.</p>
     </header>
 
-    <!-- Placeholder UI (kept super simple on purpose) -->
-    <section class="card">
-      <h2>Quick Check (placeholder)</h2>
-      <div class="grid">
-        <label>
-          11-Hour Drive Used (h:mm)
-          <input id="driveUsed" type="text" placeholder="e.g., 5:30">
-        </label>
-        <label>
-          14-Hour Window Used (h:mm)
-          <input id="windowUsed" type="text" placeholder="e.g., 6:15">
-        </label>
-        <label>
-          70-Hour / 8-Day Used (h:mm)
-          <input id="cycleUsed" type="text" placeholder="e.g., 42:00">
-        </label>
-      </div>
-      <button id="calcBtn">Calculate (Placeholder)</button>
-      <pre id="results" class="results">Results will appear here…</pre>
-    </section>
+    <div class="hos-clock-container">
+        <h2>HOS Clock</h2>
+        <div class="clock-display">
+            <div class="clock-item">
+                <span class="value">14:00</span>
+                <span class="label">14 Hr On-Duty</span>
+            </div>
+            <div class="clock-item">
+                <span class="value">11:00</span>
+                <span class="label">11 Hr Drive</span>
+            </div>
+            <div class="clock-item">
+                <span class="value">8:00</span>
+                <span class="label">8 Hr Break</span>
+            </div>
+        </div>
+    </div>
 
-    <!-- Built-in Icon Maker (no Canva needed) -->
-    <section class="card">
-      <h2>Icon Maker (generate 180/192/512 PNGs)</h2>
-      <ol class="steps">
-        <li>Tap <strong>Choose Image</strong> and select your HOS icon image (the one you sent).</li>
-        <li>Click <strong>Generate Icons</strong>.</li>
-        <li>Three files will download: <code>icon-180.png</code>, <code>icon-192.png</code>, <code>icon-512.png</code>.</li>
-        <li>Create an <code>icons</code> folder in GitHub and upload those three files.</li>
-      </ol>
-      <input id="iconFile" type="file" accept="image/*">
-      <button id="makeIconsBtn">Generate Icons (180 / 192 / 512)</button>
-      <p class="hint">These sizes match PWA requirements. Transparent PNG recommended.</p>
-    </section>
+    <div class="input-section">
+        <h2>Start Date & Time</h2>
+        <div class="input-capsule">
+            <input type="datetime-local" id="startDate" name="startDate">
+        </div>
+    </div>
 
-    <section class="card">
-      <h2>Install</h2>
-      <p>Once deployed (GitHub Pages or Netlify), open the site and “Add to Home Screen”. App runs in standalone mode and caches offline.</p>
-    </section>
+    <div class="input-section">
+        <h2>Driver Inputs</h2>
+        <div class="input-capsule">
+            <label for="emptyMiles">Empty Miles</label>
+            <input type="number" id="emptyMiles" name="emptyMiles">
+        </div>
+        <div class="input-capsule">
+            <label for="loadedMiles">Loaded Miles</label>
+            <input type="number" id="loadedMiles" name="loadedMiles">
+        </div>
+        <div class="input-capsule">
+            <label for="avgSpeed">Avg Speed (mph)</label>
+            <input type="number" id="avgSpeed" name="avgSpeed" value="50">
+        </div>
+    </div>
 
-    <footer class="foot">
-      <p>⚠️ <strong>Disclaimer:</strong> For training & educational use only — not a legal logbook replacement.</p>
-      <p>© <span id="year"></span> Toya Cramsey</p>
-    </footer>
-  </main>
+    <div class="input-section">
+        <h2>Shipper Appointment</h2>
+        <div class="input-capsule">
+            <label for="shipperAppointment">Date & Time</label>
+            <input type="datetime-local" id="shipperAppointment" name="shipperAppointment">
+        </div>
+        <div class="input-capsule">
+            <label for="stopType">Stop Type</label>
+            <select id="stopType" name="stopType">
+                <option value="drop">DROP</option>
+                <option value="live-load">LIVE LOAD</option>
+                <option value="pickup">PICK UP</option>
+            </select>
+        </div>
+    </div>
 
-  <script src="app.js"></script>
+    <div class="input-section">
+        <h2>Driver Options</h2>
+        <div class="input-capsule">
+            <label for="break">Add 30-min Break if >8hr drive?</label>
+            <select id="break" name="break">
+                <option value="yes">YES</option>
+                <option value="no">NO</option>
+            </select>
+        </div>
+        <div class="input-capsule">
+            <label for="reset">Auto 10-hr Reset if >9hr drive?</label>
+            <select id="reset" name="reset">
+                <option value="yes">YES</option>
+                <option value="no">NO</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="button-container">
+        <button id="recommendStartBtn" class="recommend-button">RECOMMEND START</button>
+        <button id="calculateBtn" class="calculate-button">CALCULATE</button>
+    </div>
+    
+    <script src="script.js"></script>
 </body>
 </html>
+
