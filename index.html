@@ -161,6 +161,67 @@
         <div class="input-capsule">
             <label for="shipperAppointment">Date & Time</label>
             <input type="datetime-local" id="shipperAppointment" name="shipperAppointment">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOS Load Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>HOS Load Calculator</h1>
+        <p>This application assists with trip planning. As a CDL holder it is your responsibility to follow all DOT and FMCSA rules and regulations. The base version of this app always assumes a full 14 hour daily clock.</p>
+    </header>
+
+    <div class="hos-clock-container">
+        <h2>HOS Clock</h2>
+        <div class="clock-display">
+            <div class="clock-item">
+                <span class="value">14:00</span>
+                <span class="label">14 Hr On-Duty</span>
+            </div>
+            <div class="clock-item">
+                <span class="value">11:00</span>
+                <span class="label">11 Hr Drive</span>
+            </div>
+            <div class="clock-item">
+                <span class="value">8:00</span>
+                <span class="label">8 Hr Break</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="input-section">
+        <h2>Start Date & Time</h2>
+        <div class="input-capsule">
+            <input type="datetime-local" id="startDate" name="startDate">
+        </div>
+    </div>
+
+    <div class="input-section">
+        <h2>Driver Inputs</h2>
+        <div class="input-capsule">
+            <label for="emptyMiles">Empty Miles</label>
+            <input type="number" id="emptyMiles" name="emptyMiles">
+        </div>
+        <div class="input-capsule">
+            <label for="loadedMiles">Loaded Miles</label>
+            <input type="number" id="loadedMiles" name="loadedMiles">
+        </div>
+        <div class="input-capsule">
+            <label for="avgSpeed">Avg Speed (mph)</label>
+            <input type="number" id="avgSpeed" name="avgSpeed" value="50">
+        </div>
+    </div>
+
+    <div class="input-section">
+        <h2>Shipper Appointment</h2>
+        <div class="input-capsule">
+            <label for="shipperAppointment">Date & Time</label>
+            <input type="datetime-local" id="shipperAppointment" name="shipperAppointment">
         </div>
         <div class="input-capsule">
             <label for="stopType">Stop Type</label>
@@ -215,23 +276,37 @@
 
     <div id="results-section" hidden>
         <div class="input-section">
-            <h2>Arrival (ETA)</h2>
-            <div class="input-capsule" id="eta-capsule">
-                <span class="value" id="eta-display"></span>
+            <h2>ETA to Shipper</h2>
+            <div class="input-capsule">
+                <span class="value" id="eta-shipper-display"></span>
             </div>
         </div>
         <div class="input-section">
-            <h2>Ready (PTA)</h2>
-            <div class="input-capsule" id="pta-capsule">
-                <span class="value" id="pta-display"></span>
+            <h2>PTA after Shipper</h2>
+            <div class="input-capsule">
+                <span class="value" id="pta-shipper-display"></span>
+                <p class="small-text">PTA = Projected Time of Availability.</p>
+            </div>
+        </div>
+        <div class="input-section">
+            <h2>ETA to Final</h2>
+            <div class="input-capsule" id="eta-final-capsule">
+                <span class="value" id="eta-final-display"></span>
+            </div>
+        </div>
+        <div class="input-section">
+            <h2>PTA after Final</h2>
+            <div class="input-capsule">
+                <span class="value" id="pta-final-display"></span>
                 <p class="small-text">PTA = Projected Time of Availability.</p>
             </div>
         </div>
         <div class="input-section">
             <h2>Status</h2>
             <div class="input-capsule" id="status-capsule">
-                <p id="eta-status"></p>
+                <p id="eta-final-status"></p>
                 <p id="window-status"></p>
+                <p id="split-sleeper-status" hidden>Split Sleeper applied (Pro Version)</p>
             </div>
         </div>
     </div>
