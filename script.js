@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         const finalAppointment = new Date(document.getElementById('finalAppointment').value);
         const shipperStopType = document.getElementById('stopType').value;
         const finalStopType = document.getElementById('finalStopType').value;
-
+        
         // Input validation
         if (!startDateValue || isNaN(startDateValue)) {
             alert("Please select a valid start date and time.");
