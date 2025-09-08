@@ -120,3 +120,19 @@ header p {
     color: #ffffff;
 }
 
+/* NEW: Classes for the status colors */
+.status-green {
+    background-color: #48bb78; /* A shade of green for ON-TIME */
+}
+
+.status-red {
+    background-color: #e53e3e; /* A shade of red for LATE */
+}
+
+.status-blue {
+    background-color: #4299e1; /* A shade of blue for EARLY */
+}
+
+.status-yellow {
+    background-color: #ecc94b; /* A shade of yellow for SPLIT SLEEPER */
+}
