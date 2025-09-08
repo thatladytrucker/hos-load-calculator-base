@@ -136,6 +136,108 @@
     <script src="script.js"></script>
 </body>
 </html>
+            <input type="datetime-local" id="startDate" name="startDate">
+        </div>
+    </div>
+
+    <div class="input-section">
+        <h2>Driver Inputs</h2>
+        <div class="input-capsule">
+            <label for="emptyMiles">Empty Miles</label>
+            <input type="number" id="emptyMiles" name="emptyMiles">
+        </div>
+        <div class="input-capsule">
+            <label for="loadedMiles">Loaded Miles</label>
+            <input type="number" id="loadedMiles" name="loadedMiles">
+        </div>
+        <div class="input-capsule">
+            <label for="avgSpeed">Avg Speed (mph)</label>
+            <input type="number" id="avgSpeed" name="avgSpeed" value="50">
+        </div>
+    </div>
+
+    <div class="input-section">
+        <h2>Shipper Appointment</h2>
+        <div class="input-capsule">
+            <label for="shipperAppointment">Date & Time</label>
+            <input type="datetime-local" id="shipperAppointment" name="shipperAppointment">
+        </div>
+        <div class="input-capsule">
+            <label for="stopType">Stop Type</label>
+            <select id="stopType" name="stopType">
+                <option value="drop-30">DROP (30 min)</option>
+                <option value="drop-60">DROP (60 min)</option>
+                <option value="live-60">LIVE LOAD (60 min)</option>
+                <option value="live-120">LIVE LOAD (120 min)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="input-section">
+        <h2>Final Appointment</h2>
+        <div class="input-capsule">
+            <label for="finalAppointment">Date & Time</label>
+            <input type="datetime-local" id="finalAppointment" name="finalAppointment">
+        </div>
+        <div class="input-capsule">
+            <label for="finalStopType">Stop Type</label>
+            <select id="finalStopType" name="finalStopType">
+                <option value="drop-30">DROP (30 min)</option>
+                <option value="drop-60">DROP (60 min)</option>
+                <option value="live-60">LIVE LOAD (60 min)</option>
+                <option value="live-120">LIVE LOAD (120 min)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="input-section">
+        <h2>Driver Options</h2>
+        <div class="input-capsule">
+            <label for="break">Add 30-min Break if >8hr drive?</label>
+            <select id="break" name="break">
+                <option value="yes">YES</option>
+                <option value="no">NO</option>
+            </select>
+        </div>
+        <div class="input-capsule">
+            <label for="reset">Auto 10-hr Reset if >9hr drive?</label>
+            <select id="reset" name="reset">
+                <option value="yes">YES</option>
+                <option value="no">NO</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="button-container">
+        <button id="recommendStartBtn" class="recommend-button">RECOMMEND START</button>
+        <button id="calculateBtn" class="calculate-button">CALCULATE</button>
+    </div>
+
+    <div id="results-section" hidden>
+        <div class="input-section">
+            <h2>Arrival (ETA)</h2>
+            <div class="input-capsule" id="eta-capsule">
+                <span class="value" id="eta-display"></span>
+            </div>
+        </div>
+        <div class="input-section">
+            <h2>Ready (PTA)</h2>
+            <div class="input-capsule" id="pta-capsule">
+                <span class="value" id="pta-display"></span>
+                <p class="small-text">PTA = Projected Time of Availability.</p>
+            </div>
+        </div>
+        <div class="input-section">
+            <h2>Status</h2>
+            <div class="input-capsule" id="status-capsule">
+                <p id="eta-status"></p>
+                <p id="window-status"></p>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
 
                 
 
