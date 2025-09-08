@@ -22,22 +22,23 @@ document.addEventListener('DOMContentLoaded', (event) => {
         const avgSpeed = parseFloat(document.getElementById('avgSpeed').value) || 50;
         const addBreak = document.getElementById('break').value === 'yes';
         const addReset = document.getElementById('reset').value === 'yes';
-        const shipperAppointment = new Date(document.getElementById('shipperAppointment').value);
         const finalAppointment = new Date(document.getElementById('finalAppointment').value);
         const shipperStopType = document.getElementById('stopType').value;
         const finalStopType = document.getElementById('finalStopType').value;
-        
+
         // Input validation
-        if (!startDateValue) {
+        if (!startDateValue || isNaN(startDateValue)) {
             alert("Please select a valid start date and time.");
             return;
         }
         let ptaCurrent = new Date(startDateValue);
 
-        // 2. Leg 0 → Shipper (Empty Miles)
+        // 2. Perform the calculations
+        // ETA to Shipper (Empty Miles)
         const emptyDriveTimeMinutes = (emptyMiles / avgSpeed) * 60;
         let etaShipper = new Date(ptaCurrent.getTime() + emptyDriveTimeMinutes * 60000);
 
+        // Dwell at Shipper
         let shipperDwellMinutes = 0;
         if (shipperStopType.includes('drop-30')) { shipperDwellMinutes = 30; }
         if (shipperStopType.includes('drop-60')) { shipperDwellMinutes = 60; }
@@ -46,10 +47,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
         
         let ptaAfterShipper = new Date(etaShipper.getTime() + shipperDwellMinutes * 60000);
 
-        // 3. Final Leg → FINAL (Loaded Miles)
+        // ETA to Final (Loaded Miles)
         const loadedDriveTimeMinutes = (loadedMiles / avgSpeed) * 60;
         let etaFinal = new Date(ptaAfterShipper.getTime() + loadedDriveTimeMinutes * 60000);
-        
+
+        // Dwell at Final
         let finalDwellMinutes = 0;
         if (finalStopType.includes('drop-30')) { finalDwellMinutes = 30; }
         if (finalStopType.includes('drop-60')) { finalDwellMinutes = 60; }
@@ -58,7 +60,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         
         let ptaFinal = new Date(etaFinal.getTime() + finalDwellMinutes * 60000);
 
-        // Add optional driver breaks/resets (these affect the entire trip)
+        // Add optional driver breaks/resets (these affect the final ETA/PTA)
         const totalDrivingTimeHours = (emptyMiles + loadedMiles) / avgSpeed;
         if (addBreak && totalDrivingTimeHours > 8) {
             etaFinal = new Date(etaFinal.getTime() + 30 * 60000);
@@ -69,31 +71,31 @@ document.addEventListener('DOMContentLoaded', (event) => {
             ptaFinal = new Date(ptaFinal.getTime() + 600 * 60000);
         }
         
-        // 4. Update the HTML output
+        // 3. Update the HTML output
         etaShipperDisplay.textContent = etaShipper.toLocaleString();
         ptaShipperDisplay.textContent = ptaAfterShipper.toLocaleString();
         etaFinalDisplay.textContent = etaFinal.toLocaleString();
         ptaFinalDisplay.textContent = ptaFinal.toLocaleString();
 
-        // 5. Apply status colors and text based on ETA vs. Final Appointment
-        etaFinalCapsule.classList.remove('status-green', 'status-red', 'status-blue', 'status-yellow'); // Clear existing classes
+        // 4. Apply status colors and text based on ETA vs. Final Appointment
+        etaFinalCapsule.classList.remove('status-green', 'status-red', 'status-blue', 'status-yellow');
         windowStatus.textContent = '';
         
         const timeDifferenceMinutes = (finalAppointment.getTime() - etaFinal.getTime()) / 60000;
         
-        if (timeDifferenceMinutes >= 0 && timeDifferenceMinutes <= 60) {
-            // ON TIME: ETA up to 60 minutes early
+        if (timeDifferenceMinutes >= 1 && timeDifferenceMinutes <= 59) {
+            // ON-TIME: 1 to 59 minutes early
             etaFinalCapsule.classList.add('status-green');
             windowStatus.textContent = 'ON-TIME';
-        } else if (timeDifferenceMinutes < 0) {
-            // LATE: ETA 1 minute or more after appointment time
+        } else if (timeDifferenceMinutes <= 0) {
+            // LATE: 1 minute or more after appointment time
             etaFinalCapsule.classList.add('status-red');
             const lateTime = Math.abs(timeDifferenceMinutes);
             const lateHours = Math.floor(lateTime / 60);
             const lateMinutes = Math.floor(lateTime % 60);
             windowStatus.textContent = `LATE: ${lateHours}h ${lateMinutes}m`;
-        } else if (timeDifferenceMinutes > 60) {
-            // EARLY: 61 minutes or more early
+        } else if (timeDifferenceMinutes >= 60) {
+            // EARLY: 60 minutes or more early
             etaFinalCapsule.classList.add('status-blue');
             const earlyTime = timeDifferenceMinutes;
             const earlyHours = Math.floor(earlyTime / 60);
@@ -101,8 +103,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
             windowStatus.textContent = `EARLY: ${earlyHours}h ${earlyMinutes}m`;
         }
         
-        // Split Sleeper check (Pro Version)
-        // This is a placeholder for future logic
+        // Split Sleeper check (placeholder)
+        // This is a placeholder for future logic in the Pro version
         splitSleeperStatus.hidden = true;
         
         // HOS rule checks
