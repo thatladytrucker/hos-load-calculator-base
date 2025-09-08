@@ -110,8 +110,32 @@
         <button id="recommendStartBtn" class="recommend-button">RECOMMEND START</button>
         <button id="calculateBtn" class="calculate-button">CALCULATE</button>
     </div>
-    
+
+    <div id="results-section" hidden>
+        <div class="input-section">
+            <h2>Arrival (ETA)</h2>
+            <div class="input-capsule" id="eta-capsule">
+                <span class="value" id="eta-display"></span>
+            </div>
+        </div>
+        <div class="input-section">
+            <h2>Ready (PTA)</h2>
+            <div class="input-capsule" id="pta-capsule">
+                <span class="value" id="pta-display"></span>
+                <p class="small-text">PTA = Projected Time of Availability.</p>
+            </div>
+        </div>
+        <div class="input-section">
+            <h2>Status</h2>
+            <div class="input-capsule" id="status-capsule">
+                <p id="eta-status"></p>
+                <p id="window-status"></p>
+            </div>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
+
+                
 
