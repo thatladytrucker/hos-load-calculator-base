@@ -10,7 +10,7 @@
 
     <header>
         <h1>HOS Load Calculator</h1>
-        <p>This app assists with trip planning. It is your job to follow all FMCSA and DOT rules and regulations as a CDL holder. The app assumes a full clock for every calculation.</p>
+        <p>This application assists with trip planning. As a CDL holder it is your responsibility to follow all DOT and FMCSA rules and regulations. The base version of this app always assumes a full 14 hour daily clock.</p>
     </header>
 
     <div class="hos-clock-container">
@@ -63,9 +63,27 @@
         <div class="input-capsule">
             <label for="stopType">Stop Type</label>
             <select id="stopType" name="stopType">
-                <option value="drop">DROP</option>
-                <option value="live-load">LIVE LOAD</option>
-                <option value="pickup">PICK UP</option>
+                <option value="drop-30">DROP (30 min)</option>
+                <option value="drop-60">DROP (60 min)</option>
+                <option value="live-60">LIVE LOAD (60 min)</option>
+                <option value="live-120">LIVE LOAD (120 min)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="input-section">
+        <h2>Final Appointment</h2>
+        <div class="input-capsule">
+            <label for="finalAppointment">Date & Time</label>
+            <input type="datetime-local" id="finalAppointment" name="finalAppointment">
+        </div>
+        <div class="input-capsule">
+            <label for="finalStopType">Stop Type</label>
+            <select id="finalStopType" name="finalStopType">
+                <option value="drop-30">DROP (30 min)</option>
+                <option value="drop-60">DROP (60 min)</option>
+                <option value="live-60">LIVE LOAD (60 min)</option>
+                <option value="live-120">LIVE LOAD (120 min)</option>
             </select>
         </div>
     </div>
@@ -96,4 +114,5 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
