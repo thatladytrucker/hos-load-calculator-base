@@ -1,176 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>HOS Load Calculator — STARTING POINT</title>
-
-  <!-- PWA (unchanged) -->
-  <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#0d1a26" />
-
-  <!-- Icons in repo root (unchanged) -->
-  <link rel="icon" type="image/png" sizes="180x180" href="hos-icon-180.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="hos-icon-192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="hos-icon-512.png">
-  <link rel="apple-touch-icon" href="hos-icon-180.png">
-
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOS Load Calculator</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="container">
+
     <header>
-      <h1>🚛 HOS Load Calculator</h1>
-      <p class="tag">MY STARTING POINT VERSION (baseline, clean)</p>
-      <p class="disclaimer">⚠️ This app assists with planning. Follow HOS guidelines and rules.</p>
+        <h1>HOS Load Calculator</h1>
+        <p>This application assists with trip planning. As a CDL holder it is your responsibility to follow all DOT and FMCSA rules and regulations. The base version of this app always assumes a full 14 hour daily clock.</p>
     </header>
 
-    <!-- HOS Clocks row (visual only in this version) -->
-    <section class="card">
-      <div class="hos-clocks">
-        <div class="clock">70:00</div>
-        <div class="clock">14:00</div>
-        <div class="clock">11:00</div>
-        <div class="clock">8:00</div>
-      </div>
-    </section>
-
-    <!-- DRIVER INPUTS -->
-    <section class="card">
-      <h2>Driver Inputs</h2>
-
-      <!-- Start date & time -->
-      <div class="row">
-        <label class="w-2">
-          Start Date &amp; Time
-          <input id="startDateTime" type="datetime-local">
-        </label>
-        <label class="w-1 selectlike">
-          <span>Time Zone</span>
-          <select id="tz">
-            <option value="local">Local</option>
-            <option value="UTC">UTC</option>
-          </select>
-        </label>
-      </div>
-
-      <!-- Miles + average speed -->
-      <div class="row">
-        <label class="w-1">
-          Empty Miles
-          <input id="emptyMiles" type="number" placeholder="0" min="0">
-        </label>
-        <label class="w-1">
-          Loaded Miles
-          <input id="loadedMiles" type="number" placeholder="0" min="0">
-        </label>
-        <label class="w-1">
-          Avg Speed (mph)
-          <input id="avgSpeed" type="number" placeholder="50" value="50" min="1">
-        </label>
-      </div>
-
-      <!-- Appointments -->
-      <div class="row">
-        <label class="w-2">
-          Shipper Appointment
-          <input id="shipperAppt" type="datetime-local">
-        </label>
-        <label class="w-1 selectlike">
-          <span>Stop Type</span>
-          <select id="shipperType">
-            <option>Pickup</option>
-            <option>Drop &amp; Hook</option>
-            <option>Live Load</option>
-          </select>
-        </label>
-      </div>
-
-      <div class="row">
-        <label class="w-2">
-          O2 Stop Appointment (optional)
-          <input id="o2Appt" type="datetime-local">
-        </label>
-        <label class="w-1 selectlike">
-          <span>Stop Type</span>
-          <select id="o2Type">
-            <option>None</option>
-            <option>Fuel</option>
-            <option>Break</option>
-            <option>Delivery</option>
-          </select>
-        </label>
-      </div>
-
-      <div class="row">
-        <label class="w-2">
-          Final Appointment
-          <input id="finalAppt" type="datetime-local">
-        </label>
-        <label class="w-1 selectlike">
-          <span>Stop Type</span>
-          <select id="finalType">
-            <option>Delivery</option>
-            <option>Drop &amp; Hook</option>
-            <option>Live Unload</option>
-          </select>
-        </label>
-      </div>
-
-      <!-- Toggles -->
-      <div class="row toggles">
-        <label class="toggle">
-          <input id="autoBreak" type="checkbox" checked>
-          <span>Add 30-min break if &gt; 8 hr drive</span>
-        </label>
-        <label class="toggle">
-          <input id="autoReset" type="checkbox">
-          <span>Auto 10-hr reset if &gt; 9 hr drive</span>
-        </label>
-      </div>
-
-      <!-- Actions -->
-      <div class="actions">
-        <button id="calcBtn">Calculate</button>
-        <button id="recommendBtn" class="ghost">Recommend Start</button>
-      </div>
-      <pre id="results" class="results">Results will appear here…</pre>
-    </section>
-
-    <!-- STATUS / OUTPUTS -->
-    <section class="card">
-      <h2>Status</h2>
-      <div class="status-grid">
-        <div class="status-item">
-          <div class="label">ETA to Shipper</div>
-          <div id="etaShipper" class="capsule neutral">00:00</div>
+    <div class="hos-clock-container">
+        <h2>HOS Clock</h2>
+        <div class="clock-display">
+            <div class="clock-item">
+                <span class="value">14:00</span>
+                <span class="label">14 Hr On-Duty</span>
+            </div>
+            <div class="clock-item">
+                <span class="value">11:00</span>
+                <span class="label">11 Hr Drive</span>
+            </div>
+            <div class="clock-item">
+                <span class="value">8:00</span>
+                <span class="label">8 Hr Break</span>
+            </div>
         </div>
-        <div class="status-item">
-          <div class="label">PTA after Stop</div>
-          <div id="ptaAfterStop" class="capsule neutral">00:00</div>
-        </div>
-        <div class="status-item">
-          <div class="label">ETA to Final</div>
-          <div id="etaFinal" class="capsule neutral">00:00</div>
-        </div>
-        <div class="status-item">
-          <div class="label">PTA after Final</div>
-          <div id="ptaAfterFinal" class="capsule neutral">00:00</div>
-        </div>
-      </div>
+    </div>
 
-      <ul class="legend">
-        <li><span class="dot green"></span> On-time: 1–59 min early</li>
-        <li><span class="dot red"></span> Late: ≥ 1 min late</li>
-        <li><span class="dot blue"></span> Very early: ≥ 1 hr early</li>
-      </ul>
-    </section>
+    <div class="input-section">
+        <h2>Start Date & Time</h2>
+        <div class="input-capsule">
+            <input type="datetime-local" id="startDate" name="startDate">
+        </div>
+    </div>
 
-    <footer class="foot">
-      <p>© <span id="year"></span> Toya Cramsey — Planning tool only; not a legal logbook.</p>
-    </footer>
-  </main>
+    <div class="input-section">
+        <h2>Driver Inputs</h2>
+        <div class="input-capsule">
+            <label for="emptyMiles">Empty Miles</label>
+            <input type="number" id="emptyMiles" name="emptyMiles">
+        </div>
+        <div class="input-capsule">
+            <label for="loadedMiles">Loaded Miles</label>
+            <input type="number" id="loadedMiles" name="loadedMiles">
+        </div>
+        <div class="input-capsule">
+            <label for="avgSpeed">Avg Speed (mph)</label>
+            <input type="number" id="avgSpeed" name="avgSpeed" value="50">
+        </div>
+    </div>
 
-  <script src="app.js"></script>
-</body>
-</html>
+    <div class="input-section">
+        <h2>Shipper Appointment</h2>
+        <div class="input-capsule">
+            <label for="shipperAppointment">Date & Time</label>
+            <input type="datetime-local" id="shipperAppointment" name="shipperAppointment">
+        </div>
+        <div class="input-capsule">
+            <label for="stopType">Stop Type</label>
+            <select id="stopType" name="stopType">
+                <option value="drop-30">DROP (30 min)</option>
+                <option value="drop-60">DROP (60 min)</option>
+                <option value="live-60">LIVE LOAD (60 min)</option>
+                <option value="live-120">LIVE LOAD (120 min)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="input-section">
+        <h2>Final Appointment</h2>
+        <div class="input-capsule">
+            <label for="finalAppointment">Date & Time</label>
+            <input type="datetime-local" id="finalAppointment" name="finalAppointment">
+        </div>
+        <div class="input-capsule">
+            <label for="finalStopType">Stop Type</label>
+            <select id="finalStopType" name="finalStopType">
+                <option value="drop-30">DROP (30 min)</option>
+                <option value="drop-60">DROP (60 min)</option>
+                <option value="live-60">LIVE LOAD (60 min)</option>
+                <option value="live-120">LIVE LOAD (120 min)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="input-section">
+        <h2>Driver Options</h2>
+        <div class="input-capsule">
+            <label for="break">Add 30-min Break if >8hr drive?</label>
+            <select id="break" name="break">
+                <option value="yes">YES</option>
+                <option value="no">NO</option>
+            </select>
+        </div>
+        <div class="input-capsule">
+            <label for="reset">Auto 10-hr Reset if >9hr drive?</label>
+            <select id="reset" name="reset">
+                <option value="yes">YES</option>
+                <option value="no">NO</option>
+            </select>
+        </div>
+    </div>
+
+
+
+
+
+  
+    
