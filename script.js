@@ -129,3 +129,57 @@ document.addEventListener('DOMContentLoaded', (event) => {
         resultsSection.removeAttribute('hidden');
     }
 });
+    // 3. Update the HTML output
+    etaShipperDisplay.textContent = etaShipper.toLocaleString();
+    ptaShipperDisplay.textContent = ptaAfterShipper.toLocaleString();
+    etaFinalDisplay.textContent = etaFinal.toLocaleString();
+    ptaFinalDisplay.textContent = ptaFinal.toLocaleString();
+
+    // 4. Apply status colors and text based on ETA vs. Appointment
+    function updateStatus(eta, appointment, capsule) {
+        capsule.classList.remove('status-green', 'status-red', 'status-blue', 'status-yellow');
+        const timeDifferenceMinutes = (appointment.getTime() - eta.getTime()) / 60000;
+        
+        if (timeDifferenceMinutes >= 1 && timeDifferenceMinutes <= 59) {
+            // ON-TIME: 1 to 59 minutes early
+            capsule.classList.add('status-green');
+        } else if (timeDifferenceMinutes < 1) {
+            // LATE: 1 minute or more after appointment time
+            capsule.classList.add('status-red');
+        } else if (timeDifferenceMinutes >= 60) {
+            // EARLY: 60 minutes or more early
+            capsule.classList.add('status-blue');
+        }
+    }
+    
+    // Apply status to both Shipper and Final
+    updateStatus(etaShipper, shipperAppointment, etaShipperCapsule);
+    updateStatus(etaFinal, finalAppointment, etaFinalCapsule);
+
+    // Update the textual status for the final appointment
+    const finalTimeDifferenceMinutes = (finalAppointment.getTime() - etaFinal.getTime()) / 60000;
+    if (finalTimeDifferenceMinutes >= 1 && finalTimeDifferenceMinutes <= 59) {
+        windowStatus.textContent = 'ON-TIME';
+    } else if (finalTimeDifferenceMinutes < 1) {
+        const lateTime = Math.abs(finalTimeDifferenceMinutes);
+        const lateHours = Math.floor(lateTime / 60);
+        const lateMinutes = Math.floor(lateTime % 60);
+        windowStatus.textContent = `LATE: ${lateHours}h ${lateMinutes}m`;
+    } else if (finalTimeDifferenceMinutes >= 60) {
+        const earlyTime = finalTimeDifferenceMinutes;
+        const earlyHours = Math.floor(earlyTime / 60);
+        const earlyMinutes = Math.floor(earlyTime % 60);
+        windowStatus.textContent = `EARLY: ${earlyHours}h ${earlyMinutes}m`;
+    }
+    
+    // Split Sleeper check (placeholder)
+    splitSleeperStatus.hidden = true;
+    
+    // HOS rule checks
+    const totalDrivingTimeHours = (emptyMiles + loadedMiles) / avgSpeed;
+    const driveTimeStatus = totalDrivingTimeHours <= 11 ? 'OK' : 'NOT OK';
+    etaFinalStatus.textContent = `11h drive: ${driveTimeStatus}`;
+    etaFinalStatus.style.color = driveTimeStatus === 'OK' ? '#48bb78' : '#e53e3e';
+
+    // Display the results section
+    resultsSection.removeAttribute('hidden');
