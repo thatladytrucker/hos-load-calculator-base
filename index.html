@@ -106,6 +106,48 @@
         </div>
     </div>
 
+    <div class="button-container">
+        <button id="recommendStartBtn" class="recommend-button">RECOMMEND START</button>
+        <button id="calculateBtn" class="calculate-button">CALCULATE</button>
+    </div>
+
+    <div id="results-section" hidden>
+        <div class="input-section">
+            <h2>Status</h2>
+            <div class="output-row">
+                <div class="output-capsule" id="eta-shipper-capsule">
+                    <h3>ETA to Shipper</h3>
+                    <span class="value" id="eta-shipper-display"></span>
+                </div>
+                <div class="output-capsule">
+                    <h3>PTA after Shipper</h3>
+                    <span class="value" id="pta-shipper-display"></span>
+                </div>
+            </div>
+
+            <div class="output-row">
+                <div class="output-capsule" id="eta-final-capsule">
+                    <h3>ETA to Final</h3>
+                    <span class="value" id="eta-final-display"></span>
+                </div>
+                <div class="output-capsule">
+                    <h3>PTA after Final</h3>
+                    <span class="value" id="pta-final-display"></span>
+                </div>
+            </div>
+
+            <div class="input-capsule" id="status-capsule">
+                <p id="eta-final-status"></p>
+                <p id="window-status"></p>
+                <p id="split-sleeper-status" hidden>Split Sleeper applied (Pro Version)</p>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
+
+
 
 
 
