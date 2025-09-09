@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     // Get all the necessary elements from the HTML
     const calculateBtn = document.getElementById('calculateBtn');
     const resultsSection = document.getElementById('results-section');
+    const etaShipperCapsule = document.getElementById('eta-shipper-capsule');
     const etaShipperDisplay = document.getElementById('eta-shipper-display');
     const ptaShipperDisplay = document.getElementById('pta-shipper-display');
     const etaFinalCapsule = document.getElementById('eta-final-capsule');
@@ -22,6 +23,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         const avgSpeed = parseFloat(document.getElementById('avgSpeed').value) || 50;
         const addBreak = document.getElementById('break').value === 'yes';
         const addReset = document.getElementById('reset').value === 'yes';
+        const shipperAppointment = new Date(document.getElementById('shipperAppointment').value);
         const finalAppointment = new Date(document.getElementById('finalAppointment').value);
         const shipperStopType = document.getElementById('stopType').value;
         const finalStopType = document.getElementById('finalStopType').value;
@@ -77,34 +79,44 @@ document.addEventListener('DOMContentLoaded', (event) => {
         etaFinalDisplay.textContent = etaFinal.toLocaleString();
         ptaFinalDisplay.textContent = ptaFinal.toLocaleString();
 
-        // 4. Apply status colors and text based on ETA vs. Final Appointment
-        etaFinalCapsule.classList.remove('status-green', 'status-red', 'status-blue', 'status-yellow');
-        windowStatus.textContent = '';
+        // 4. Apply status colors and text based on ETA vs. Appointment
+        function updateStatus(eta, appointment, capsule) {
+            capsule.classList.remove('status-green', 'status-red', 'status-blue', 'status-yellow');
+            const timeDifferenceMinutes = (appointment.getTime() - eta.getTime()) / 60000;
+            
+            if (timeDifferenceMinutes >= 1 && timeDifferenceMinutes <= 59) {
+                // ON-TIME: 1 to 59 minutes early
+                capsule.classList.add('status-green');
+            } else if (timeDifferenceMinutes < 1) {
+                // LATE: 1 minute or more after appointment time
+                capsule.classList.add('status-red');
+            } else if (timeDifferenceMinutes >= 60) {
+                // EARLY: 60 minutes or more early
+                capsule.classList.add('status-blue');
+            }
+        }
         
-        const timeDifferenceMinutes = (finalAppointment.getTime() - etaFinal.getTime()) / 60000;
-        
-        if (timeDifferenceMinutes >= 1 && timeDifferenceMinutes <= 59) {
-            // ON-TIME: 1 to 59 minutes early
-            etaFinalCapsule.classList.add('status-green');
+        // Apply status to both Shipper and Final
+        updateStatus(etaShipper, shipperAppointment, etaShipperCapsule);
+        updateStatus(etaFinal, finalAppointment, etaFinalCapsule);
+
+        // Update the textual status for the final appointment
+        const finalTimeDifferenceMinutes = (finalAppointment.getTime() - etaFinal.getTime()) / 60000;
+        if (finalTimeDifferenceMinutes >= 1 && finalTimeDifferenceMinutes <= 59) {
             windowStatus.textContent = 'ON-TIME';
-        } else if (timeDifferenceMinutes <= 0) {
-            // LATE: 1 minute or more after appointment time
-            etaFinalCapsule.classList.add('status-red');
-            const lateTime = Math.abs(timeDifferenceMinutes);
+        } else if (finalTimeDifferenceMinutes < 1) {
+            const lateTime = Math.abs(finalTimeDifferenceMinutes);
             const lateHours = Math.floor(lateTime / 60);
             const lateMinutes = Math.floor(lateTime % 60);
             windowStatus.textContent = `LATE: ${lateHours}h ${lateMinutes}m`;
-        } else if (timeDifferenceMinutes >= 60) {
-            // EARLY: 60 minutes or more early
-            etaFinalCapsule.classList.add('status-blue');
-            const earlyTime = timeDifferenceMinutes;
+        } else if (finalTimeDifferenceMinutes >= 60) {
+            const earlyTime = finalTimeDifferenceMinutes;
             const earlyHours = Math.floor(earlyTime / 60);
             const earlyMinutes = Math.floor(earlyTime % 60);
             windowStatus.textContent = `EARLY: ${earlyHours}h ${earlyMinutes}m`;
         }
         
         // Split Sleeper check (placeholder)
-        // This is a placeholder for future logic in the Pro version
         splitSleeperStatus.hidden = true;
         
         // HOS rule checks
