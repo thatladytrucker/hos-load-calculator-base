@@ -1,148 +1,142 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HOS Load Calculator</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HOS Load Calculator — v6.1a (Baseline)</title>
+
+  <!-- PWA basics -->
+  <meta name="theme-color" content="#0f172a" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <!-- icons (put pngs in /icons) -->
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png" />
+
+  <!-- App styles -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Minimal dark fallback so page isn't bright if CSS hasn't loaded yet -->
+  <style>
+    :root{
+      --bg:#0f172a;        /* slate-900 */
+      --card:#111827;      /* gray-900 */
+      --text:#e5e7eb;      /* gray-200 */
+      --muted:#94a3b8;     /* slate-400 */
+      --accent:#60a5fa;    /* blue-400 */
+      --good:#10b981;      /* emerald-500 */
+      --bad:#ef4444;       /* red-500 */
+      --warn:#f59e0b;      /* amber-500 */
+      --btn:#3b82f6;       /* blue-500 */
+      --btnText:#ffffff;
+      --radius:14px;
+    }
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+    body{margin:0;background:var(--bg);color:var(--text)}
+    .container{max-width:960px;margin:auto;padding:16px}
+    header, footer{display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .title{font-weight:700;font-size:1.1rem;letter-spacing:.2px}
+    .card{background:var(--card);border:1px solid #1f2937;border-radius:var(--radius);padding:14px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:720px){.row{grid-template-columns:1fr}}
+    label{font-size:.85rem;color:var(--muted);display:block;margin-bottom:6px}
+    input,select{width:100%;background:#0b1220;color:var(--text);border:1px solid #1f2937;border-radius:10px;padding:10px}
+    .btnbar{display:flex;gap:8px;flex-wrap:wrap}
+    button{background:var(--btn);color:var(--btnText);border:0;border-radius:12px;padding:10px 14px;font-weight:600}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;font-weight:600}
+    .pill.good{background:rgba(16,185,129,.12);color:var(--good)}
+    .pill.bad{background:rgba(239,68,68,.12);color:var(--bad)}
+    .pill.warn{background:rgba(245,158,11,.12);color:var(--warn)}
+    small.disclaimer{color:var(--muted);font-size:.78rem;line-height:1.3}
+    a{color:var(--accent);text-decoration:none}
+  </style>
 </head>
 <body>
+  <noscript>
+    <div class="container">
+      <p class="card">This app needs JavaScript to run.</p>
+    </div>
+  </noscript>
 
+  <div class="container">
+    <!-- HEADER -->
     <header>
-        <h1>HOS Load Calculator</h1>
-        <p>This application assists with trip planning. As a CDL holder it is your responsibility to follow all DOT and FMCSA rules and regulations. The base version of this app always assumes a full 14 hour daily clock.</p>
+      <div class="title">TOYA’S HOS LOAD CALCULATOR <span style="opacity:.6">v6.1a</span></div>
+      <div class="pill warn" id="netStatus">PWA: offline-ready</div>
     </header>
 
-    <div class="hos-clock-container">
-        <h2>HOS Clock</h2>
-        <div class="clock-display">
-            <div class="clock-item">
-                <span class="value">14:00</span>
-                <span class="label">14 Hr On-Duty</span>
-            </div>
-            <div class="clock-item">
-                <span class="value">11:00</span>
-                <span class="label">11 Hr Drive</span>
-            </div>
-            <div class="clock-item">
-                <span class="value">8:00</span>
-                <span class="label">8 Hr Break</span>
-            </div>
+    <!-- INPUTS -->
+    <section class="card" aria-labelledby="inputsTitle">
+      <h2 id="inputsTitle" style="margin:0 0 8px 0;font-size:1rem">Driver Inputs</h2>
+      <div class="row">
+        <div>
+          <label for="eta">Planned ETA (local)</label>
+          <input type="time" id="eta" />
         </div>
-    </div>
+        <div>
+          <label for="pta">PTA (Projected Time Available)</label>
+          <input type="time" id="pta" />
+        </div>
+        <div>
+          <label for="driveHrs">Drive hours remaining</label>
+          <input type="number" id="driveHrs" min="0" step="0.25" placeholder="e.g., 6.5" />
+        </div>
+        <div>
+          <label for="split">8/2 Split?</label>
+          <select id="split">
+            <option value="none">No</option>
+            <option value="8-2">8/2 Eligible</option>
+          </select>
+        </div>
+      </div>
+      <div class="btnbar" style="margin-top:12px">
+        <button id="calcBtn">Calculate</button>
+        <button id="resetBtn" type="button">Reset</button>
+        <button id="helpBtn" type="button">Help</button>
+      </div>
+    </section>
 
-    <div class="input-section">
-        <h2>Start Date & Time</h2>
-        <div class="input-capsule">
-            <input type="datetime-local" id="startDate" name="startDate">
+    <!-- STATUS / OUTPUTS -->
+    <section class="card" aria-labelledby="statusTitle" style="margin-top:12px">
+      <h2 id="statusTitle" style="margin:0 0 8px 0;font-size:1rem">Status & Outputs</h2>
+      <div class="row">
+        <div class="card" style="background:#0b1220">
+          <label>On-Time Status</label>
+          <div id="ontimePill" class="pill good">On time</div>
         </div>
-    </div>
+        <div class="card" style="background:#0b1220">
+          <label>Projected Arrival</label>
+          <div id="projectedArrival" class="pill">—</div>
+        </div>
+        <div class="card" style="background:#0b1220">
+          <label>Notes</label>
+          <div id="notes" style="color:var(--muted)">—</div>
+        </div>
+      </div>
+    </section>
 
-    <div class="input-section">
-        <h2>Driver Inputs</h2>
-        <div class="input-capsule">
-            <label for="emptyMiles">Empty Miles</label>
-            <input type="number" id="emptyMiles" name="emptyMiles">
-        </div>
-        <div class="input-capsule">
-            <label for="loadedMiles">Loaded Miles</label>
-            <input type="number" id="loadedMiles" name="loadedMiles">
-        </div>
-        <div class="input-capsule">
-            <label for="avgSpeed">Avg Speed (mph)</label>
-            <input type="number" id="avgSpeed" name="avgSpeed" value="50">
-        </div>
-    </div>
+    <!-- DISCLAIMER -->
+    <section class="card" style="margin-top:12px">
+      <h3 style="margin:0 0 6px 0;font-size:1rem">Disclaimer</h3>
+      <small class="disclaimer">
+        This tool is for planning and training only. It does not replace FMCSA regulations, carrier policy,
+        or your ELD. Always follow posted laws, your dispatcher’s instructions, and facility rules.
+        Use at your own risk.
+      </small>
+    </section>
 
-    <div class="input-section">
-        <h2>Shipper Appointment</h2>
-        <div class="input-capsule">
-            <label for="shipperAppointment">Date & Time</label>
-            <input type="datetime-local" id="shipperAppointment" name="shipperAppointment">
-        </div>
-        <div class="input-capsule">
-            <label for="stopType">Stop Type</label>
-            <select id="stopType" name="stopType">
-                <option value="drop-30">DROP (30 min)</option>
-                <option value="drop-60">DROP (60 min)</option>
-                <option value="live-60">LIVE LOAD (60 min)</option>
-                <option value="live-120">LIVE LOAD (120 min)</option>
-            </select>
-        </div>
-    </div>
+    <!-- FOOTER -->
+    <footer style="margin-top:16px">
+      <small class="disclaimer">© <span id="year"></span> Toya Cramsey. All rights reserved.</small>
+      <a href="#" id="installLink" hidden>Install App</a>
+    </footer>
+  </div>
 
-    <div class="input-section">
-        <h2>Final Appointment</h2>
-        <div class="input-capsule">
-            <label for="finalAppointment">Date & Time</label>
-            <input type="datetime-local" id="finalAppointment" name="finalAppointment">
-        </div>
-        <div class="input-capsule">
-            <label for="finalStopType">Stop Type</label>
-            <select id="finalStopType" name="finalStopType">
-                <option value="drop-30">DROP (30 min)</option>
-                <option value="drop-60">DROP (60 min)</option>
-                <option value="live-60">LIVE LOAD (60 min)</option>
-                <option value="live-120">LIVE LOAD (120 min)</option>
-            </select>
-        </div>
-    </div>
-
-    <div class="input-section">
-        <h2>Driver Options</h2>
-        <div class="input-capsule">
-            <label for="break">Add 30-min Break if >8hr drive?</label>
-            <select id="break" name="break">
-                <option value="yes">YES</option>
-                <option value="no">NO</option>
-            </select>
-        </div>
-        <div class="input-capsule">
-            <label for="reset">Auto 10-hr Reset if >9hr drive?</label>
-            <select id="reset" name="reset">
-                <option value="yes">YES</option>
-                <option value="no">NO</option>
-            </select>
-        </div>
-    </div>
-
-    <div class="button-container">
-        <button id="recommendStartBtn" class="recommend-button">RECOMMEND START</button>
-        <button id="calculateBtn" class="calculate-button">CALCULATE</button>
-    </div>
-
-    <div id="results-section" hidden>
-        <div class="input-section">
-            <h2>Status</h2>
-            <div class="output-row">
-                <div class="output-capsule" id="eta-shipper-capsule">
-                    <h3>ETA to Shipper</h3>
-                    <span class="value" id="eta-shipper-display"></span>
-                </div>
-                <div class="output-capsule">
-                    <h3>PTA after Shipper</h3>
-                    <span class="value" id="pta-shipper-display"></span>
-                </div>
-            </div>
-
-            <div class="output-row">
-                <div class="output-capsule" id="eta-final-capsule">
-                    <h3>ETA to Final</h3>
-                    <span class="value" id="eta-final-display"></span>
-                </div>
-                <div class="output-capsule">
-                    <h3>PTA after Final</h3>
-                    <span class="value" id="pta-final-display"></span>
-                </div>
-            </div>
-
-            <div class="input-capsule" id="status-capsule">
-                <p id="eta-final-status"></p>
-                <p id="window-status"></p>
-                <p id="split-sleeper-status" hidden>Split Sleeper applied (Pro Version)</p>
-            </div>
-        </div>
-    </div>
-    <script src="script.js"></script>
+  <!-- App logic & PWA registration -->
+  <script src="app.js"></script>
+  <script>
+    // tiny helper so footer year is correct even without app.js
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
