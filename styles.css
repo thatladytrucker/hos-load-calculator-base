@@ -1,138 +1,137 @@
+/* styles.css — HOS Load Calculator v6.1a baseline */
+
+/* ---------- Theme Variables ---------- */
+:root {
+  --bg: #0f172a;        /* slate-900 */
+  --card: #111827;      /* gray-900 */
+  --text: #e5e7eb;      /* gray-200 */
+  --muted: #94a3b8;     /* slate-400 */
+  --accent: #60a5fa;    /* blue-400 */
+  --good: #10b981;      /* emerald-500 */
+  --bad: #ef4444;       /* red-500 */
+  --warn: #f59e0b;      /* amber-500 */
+  --btn: #3b82f6;       /* blue-500 */
+  --btnText: #ffffff;
+  --radius: 14px;
+}
+
+/* ---------- Base ---------- */
+* {
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+}
 body {
-    font-family: Arial, sans-serif;
-    background-color: #1a1a2e;
-    color: #ffffff;
-    margin: 0;
-    padding: 20px;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+a {
+  color: var(--accent);
+  text-decoration: none;
 }
 
-header {
-    text-align: center;
-    margin-bottom: 20px;
+/* ---------- Layout ---------- */
+.container {
+  max-width: 960px;
+  margin: auto;
+  padding: 16px;
+}
+header,
+footer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+.title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.2px;
+}
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 720px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
 }
 
-header h1 {
-    color: #9f7aea;
+/* ---------- Cards ---------- */
+.card {
+  background: var(--card);
+  border: 1px solid #1f2937;
+  border-radius: var(--radius);
+  padding: 14px;
 }
 
-header p {
-    font-size: 0.9em;
-    color: #a0aec0;
+/* ---------- Form Elements ---------- */
+label {
+  font-size: 0.85rem;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 6px;
+}
+input,
+select {
+  width: 100%;
+  background: #0b1220;
+  color: var(--text);
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  padding: 10px;
 }
 
-.hos-clock-container {
-    margin: 20px 0;
+/* ---------- Buttons ---------- */
+.btnbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+button {
+  background: var(--btn);
+  color: var(--btnText);
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+button:hover {
+  opacity: 0.9;
+}
+button:active {
+  transform: scale(0.97);
 }
 
-.hos-clock-container h2 {
-    font-size: 1.2em;
-    border-bottom: 2px solid #667eea;
-    padding-bottom: 5px;
+/* ---------- Pills / Status ---------- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+.pill.good {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--good);
+}
+.pill.bad {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--bad);
+}
+.pill.warn {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--warn);
 }
 
-.clock-display {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
+/* ---------- Disclaimer ---------- */
+small.disclaimer {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.3;
 }
 
-.clock-item {
-    background-color: #2e2e4a;
-    border-radius: 10px;
-    padding: 15px;
-    text-align: center;
-    flex: 1;
-    min-width: 120px;
-}
-
-.clock-item .value {
-    font-size: 1.5em;
-    font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
-    color: #667eea;
-}
-
-.clock-item .label {
-    font-size: 0.8em;
-    color: #a0aec0;
-}
-
-.input-section {
-    margin-bottom: 20px;
-}
-
-.input-section h2 {
-    font-size: 1.2em;
-    border-bottom: 2px solid #667eea;
-    padding-bottom: 5px;
-    margin-bottom: 10px;
-}
-
-.input-capsule {
-    background-color: #2e2e4a;
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 10px;
-    display: flex;
-    flex-direction: column;
-}
-
-.input-capsule label {
-    font-size: 0.9em;
-    color: #a0aec0;
-    margin-bottom: 5px;
-}
-
-.input-capsule input, .input-capsule select {
-    background-color: transparent;
-    border: none;
-    color: #ffffff;
-    font-size: 1em;
-    padding: 5px 0;
-}
-
-.button-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.button-container button {
-    flex: 1;
-    padding: 15px;
-    border: none;
-    border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
-    text-transform: uppercase;
-}
-
-.recommend-button {
-    background-color: #a0aec0;
-    color: #1a1a2e;
-}
-
-.calculate-button {
-    background-color: #667eea;
-    color: #ffffff;
-}
-
-/* NEW: Classes for the status colors */
-.status-green {
-    background-color: #48bb78; /* A shade of green for ON-TIME */
-}
-
-.status-red {
-    background-color: #e53e3e; /* A shade of red for LATE */
-}
-
-.status-blue {
-    background-color: #4299e1; /* A shade of blue for EARLY */
-}
-
-.status-yellow {
-    background-color: #ecc94b; /* A shade of yellow for SPLIT SLEEPER */
-}
