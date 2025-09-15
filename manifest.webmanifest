@@ -1,81 +1,18 @@
-/* service-worker.js — HOS Load Calculator v6.1a (baseline) */
+{
+  "name": "TOYA’S HOS LOAD CALCULATOR",
+  "short_name": "HOS Calc",
+  "description": "A simple, dark-mode planner for ETA/PTA and HOS-based arrival estimates.",
+  "start_url": "./?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
 
-const CACHE_NAME = "hos-v6.1a-2025-09-15";
-const CORE_ASSETS = [
-  "./",
-  "./index.html",
-  "./styles.css",
-  "./app.js",
-  "./manifest.webmanifest",
-  "./icons/icon-180.png",
-  "./icons/icon-192.png",
-  "./icons/icon-512.png"
-  // "./icons/icon-512-maskable.png" // add when available
-];
-
-// Install: cache core files
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS))
-  );
-  self.skipWaiting();
-});
-
-// Activate: clean old caches
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.map((k) => (k === CACHE_NAME ? null : caches.delete(k))))
-    )
-  );
-  self.clients.claim();
-});
-
-// Fetch strategy:
-// - HTML/navigation: try network first, fallback to cached index.html
-// - Other assets: cache-first, then network fallback
-self.addEventListener("fetch", (event) => {
-  const req = event.request;
-
-  // Treat navigations (document requests) with a network-first approach
-  if (req.mode === "navigate" || (req.destination === "document" && req.method === "GET")) {
-    event.respondWith(
-      (async () => {
-        try {
-          const fresh = await fetch(req);
-          return fresh;
-        } catch (err) {
-          // offline fallback to cached shell
-          const cache = await caches.open(CACHE_NAME);
-          const cached = await cache.match("./index.html");
-          return cached || new Response("Offline", { status: 503, statusText: "Offline" });
-        }
-      })()
-    );
-    return;
-  }
-
-  // For static assets: cache-first
-  event.respondWith(
-    (async () => {
-      const cache = await caches.open(CACHE_NAME);
-      const cached = await cache.match(req);
-      if (cached) return cached;
-      try {
-        const fresh = await fetch(req);
-        // Only cache successful GETs
-        if (req.method === "GET" && fresh && fresh.status === 200 && fresh.type !== "opaque") {
-          cache.put(req, fresh.clone());
-        }
-        return fresh;
-      } catch (err) {
-        // last-resort: try index for same-origin requests
-        if (new URL(req.url).origin === self.location.origin) {
-          const fallback = await cache.match("./index.html");
-          if (fallback) return fallback;
-        }
-        throw err;
-      }
-    })()
-  );
-});
