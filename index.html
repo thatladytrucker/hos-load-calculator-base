@@ -135,23 +135,36 @@
   <!-- App logic & PWA registration -->
   <script src="app.js"></script>
   <script>
+    <script src="app.js"></script>
+  <script>
     // tiny helper so footer year is correct even without app.js
-    document.getElementById('year').textContent = new Date().getFullYear();
+    document.getElementById("year").textContent = new Date().getFullYear();
   </script>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("/service-worker.js")
+          .then((registration) => {
+            console.log("Service Worker registered with scope:", registration.scope);
+          })
+          .catch((error) => {
+            console.log("Service Worker registration failed:", error);
+          });
+      });
+    }
+  </script>
+
 </body>
 </html>
-
-<script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker
-        .register("/service-worker.js")
-        .then((registration) => {
-          console.log("Service Worker registered with scope:", registration.scope);
-        })
-        .catch((error) => {
-          console.log("Service Worker registration failed:", error);
-        });
-    });
-  }
-</script>
+   
+    
+    
+    
+    
+    
+    
+    
+    
