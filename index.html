@@ -177,8 +177,8 @@
   }
 </style>
 <link rel="manifest" href="manifest.webmanifest" />
-<link rel="icon" sizes="192x192" href="icons/app-192.png">
-<link rel="apple-touch-icon" href="icons/app-180.png">
+<link rel="icon" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
 </head>
 <body>
   <h1>HOS Load Calculator (Offline)</h1>
@@ -191,7 +191,7 @@
           <div class="label">TRIP ID</div>
           <div class="inline">
             <input id="tripId" placeholder="e.g., TEST001" />
-            <button class="btn mutebtn" id="genId">Auto</button>
+            <button class="btn mutebtn" id="genId" type="button">Auto</button>
           </div>
         </div>
         <div>
@@ -265,8 +265,8 @@
       <div class="stickyfoot">
         <div class="hr"></div>
         <div class="inline right">
-          <button id="calc" class="btn">Calculate</button>
-          <button id="reset" class="btn mutebtn">Reset</button>
+          <button id="calc" class="btn" type="button">Calculate</button>
+          <button id="reset" class="btn mutebtn" type="button">Reset</button>
         </div>
       </div>
     </div>
@@ -345,10 +345,9 @@
     <div class="hos-controls">
       <div class="hos-status-buttons">
         <span>Duty Status:</span>
+        <!-- On Duty first -->
+        <button data-status="ON_DUTY" class="hos-status-btn">On Duty (Not Driving)</button>
         <button data-status="DRIVING" class="hos-status-btn">Driving</button>
-        <button data-status="ON_DUTY" class="hos-status-btn">
-          On Duty (Not Driving)
-        </button>
         <button data-status="BREAK" class="hos-status-btn">
           Break / Off Duty
         </button>
@@ -357,7 +356,7 @@
         </button>
       </div>
 
-      <button id="btn-reset-hos" class="hos-reset">
+      <button id="btn-reset-hos" class="hos-reset" type="button">
         Reset HOS (after legal 10-hr break)
       </button>
     </div>
@@ -369,7 +368,7 @@
     <div id="recentTripsList" class="recent-list note">
       No trips saved yet.
     </div>
-    <button id="clearTrips">Clear recent trips</button>
+    <button id="clearTrips" type="button">Clear recent trips</button>
   </section>
 
   <!-- Disclaimer -->
@@ -387,8 +386,8 @@
     </span>
   </footer>
 
-  <!-- Floating Let’s Roll button (HOS clocks only) -->
-  <button class="fab" id="btn-lets-roll">Let’s Roll</button>
+  <!-- Floating Let’s Roll button (starts day On Duty) -->
+  <button class="fab" id="btn-lets-roll" type="button">Let’s Roll</button>
 
 <script>
 (function(){
@@ -450,31 +449,23 @@
     recentTrips.forEach(trip=>{
       const div = document.createElement('div');
       div.className = "recent-trip";
-
       const title = document.createElement('div');
       title.className = "recent-trip-title";
       title.textContent = trip.tripId || "(no ID)";
-
-      const meta1 = document.createElement('div');
-      meta1.className = "recent-trip-meta";
-      meta1.textContent =
-        `Start: ${trip.tripStartFmt} • Shipper Appt: ${trip.shipApptFmt} • Cons Appt: ${trip.consApptFmt}`;
-
-      const meta2 = document.createElement('div');
-      meta2.className = "recent-trip-meta";
-      meta2.textContent =
-        `DH: ${trip.deadhead} • LD: ${trip.loaded} • Total: ${trip.total} • ETA Sh: ${trip.etaShFmt} • PTA Co: ${trip.ptaCoFmt}`;
-
+      const meta = document.createElement('div');
+      meta.className = "recent-trip-meta";
+      meta.textContent =
+        `Start: ${trip.tripStartFmt} • Shipper Appt: ${trip.shipperApptFmt} • Consignee Appt: ${trip.consApptFmt} • ` +
+        `DH: ${trip.deadhead} • LD: ${trip.loaded} • TOT: ${trip.totalMiles} • ` +
+        `ETA Shipper: ${trip.etaShFmt} • PTA Consignee: ${trip.ptaCoFmt}`;
       div.appendChild(title);
-      div.appendChild(meta1);
-      div.appendChild(meta2);
+      div.appendChild(meta);
       listEl.appendChild(div);
     });
   }
 
   function saveRecentTrip(meta){
     recentTrips.unshift(meta);
-    // keep only last 8 trips
     if(recentTrips.length > 8) recentTrips.length = 8;
     saveRecentTrips();
     renderRecentTrips();
@@ -597,26 +588,20 @@
       etaCo,
       ptaCo: PTA_CO,
       explainSh: explainETA(ETA_SH, shipAppt),
-      explainCo: explainETA(ETA_CO, consAppt, breakMs, afterConsBufferMs, consDwell),
-      meta: {
-        tripId,
-        tripStartISO: tripStart.toISOString(),
-        etaShISO: ETA_SH.toISOString(),
-        ptaCoISO: PTA_CO.toISOString()
-      }
+      explainCo: explainETA(ETA_CO, consAppt, breakMs, afterConsBufferMs, consDwell)
     };
 
     showResults(payload);
 
-    // Save to recent trips (last 8) with extra fields
+    // Save to recent trips with extra fields
     saveRecentTrip({
       tripId,
       tripStartFmt: fmt(tripStart),
-      shipApptFmt: shipAppt ? fmt(shipAppt) : "—",
-      consApptFmt: consAppt ? fmt(consAppt) : "—",
-      deadhead: isFinite(dh) ? dh : 0,
-      loaded: isFinite(lm) ? lm : 0,
-      total: totalMiles,
+      shipperApptFmt: fmt(shipAppt),
+      consApptFmt: fmt(consAppt),
+      deadhead: isFinite(dh)?dh:0,
+      loaded: isFinite(lm)?lm:0,
+      totalMiles,
       etaShFmt: fmt(ETA_SH),
       ptaCoFmt: fmt(PTA_CO),
       createdAt: new Date().toISOString()
@@ -651,7 +636,7 @@
   renderRecentTrips();
 
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('sw.js');
+    navigator.serviceWorker.register('service-worker.js');
   }
 })();
 </script>
@@ -659,37 +644,33 @@
 <!-- HOS clocks logic -->
 <script>
 (function () {
-  const STORAGE_KEY = "hosClocksState_v1";
+  const STORAGE_KEY = "hosClocksState_v2"; // bump version so old state doesn't conflict
 
   const DUTY_WINDOW_SECONDS = 14 * 3600;
   const DRIVE_LIMIT_SECONDS = 11 * 3600;
   const BREAK_LIMIT_SECONDS = 8 * 3600;
   const MIN_BREAK_SECONDS = 30 * 60;
 
+  function baseState() {
+    return {
+      dayStart: null,
+      dutyStatus: "OFF",
+      lastStatusChange: null,
+      driveSecondsUsed: 0,
+      driveSinceBreakSeconds: 0,
+      breakSecondsCurrentStint: 0
+    };
+  }
+
   function loadState() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) {
-        return {
-          dayStart: null,
-          dutyStatus: "OFF",
-          lastStatusChange: null,
-          driveSecondsUsed: 0,
-          onDutySinceBreakSeconds: 0,
-          breakSecondsCurrentStint: 0
-        };
-      }
-      return JSON.parse(raw);
+      if (!raw) return baseState();
+      const parsed = JSON.parse(raw);
+      return Object.assign(baseState(), parsed);
     } catch (e) {
       console.error("Failed to load HOS state", e);
-      return {
-        dayStart: null,
-        dutyStatus: "OFF",
-        lastStatusChange: null,
-        driveSecondsUsed: 0,
-        onDutySinceBreakSeconds: 0,
-        breakSecondsCurrentStint: 0
-      };
+      return baseState();
     }
   }
 
@@ -733,19 +714,24 @@
     if (delta <= 0) return;
 
     if (state.dutyStatus === "DRIVING") {
+      // Driving time counts toward 11hr and 8hr clocks
       state.driveSecondsUsed += delta;
-      state.onDutySinceBreakSeconds += delta;
-    } else if (state.dutyStatus === "ON_DUTY") {
-      state.onDutySinceBreakSeconds += delta;
+      state.driveSinceBreakSeconds += delta;
     } else if (state.dutyStatus === "BREAK") {
       state.breakSecondsCurrentStint += delta;
     }
-
+    // On-duty not driving only affects 14-hr via dayStart, not 11hr/8hr
     state.lastStatusChange = current.toISOString();
   }
 
   function setDutyStatus(newStatus) {
     const current = now();
+
+    // Don't allow starting the day directly on DRIVING
+    if (!state.dayStart && newStatus === "DRIVING") {
+      alert('Start your day On Duty before Driving. Select "On Duty (Not Driving)" first.');
+      return;
+    }
 
     if (state.lastStatusChange) {
       applyStatusAccrual();
@@ -753,11 +739,17 @@
       state.lastStatusChange = current.toISOString();
     }
 
+    // Leaving BREAK: if 30m break completed, reset drive-since-break counter
     if (state.dutyStatus === "BREAK") {
       if (state.breakSecondsCurrentStint >= MIN_BREAK_SECONDS) {
-        state.onDutySinceBreakSeconds = 0;
+        state.driveSinceBreakSeconds = 0;
       }
       state.breakSecondsCurrentStint = 0;
+    }
+
+    // First time going On Duty or Driving: start the 14-hr window
+    if (!state.dayStart && newStatus === "ON_DUTY") {
+      state.dayStart = current.toISOString();
     }
 
     state.dutyStatus = newStatus;
@@ -768,26 +760,14 @@
 
   function startDay() {
     const current = now();
-
     if (!state.dayStart) {
       state.dayStart = current.toISOString();
     }
-
-    state.dutyStatus = "DRIVING";
-    state.lastStatusChange = current.toISOString();
-    saveState();
-    updateUI();
+    setDutyStatus("ON_DUTY");
   }
 
   function resetHOS() {
-    state = {
-      dayStart: null,
-      dutyStatus: "OFF",
-      lastStatusChange: null,
-      driveSecondsUsed: 0,
-      onDutySinceBreakSeconds: 0,
-      breakSecondsCurrentStint: 0
-    };
+    state = baseState();
     saveState();
     updateUI();
   }
@@ -841,6 +821,7 @@
 
     const current = now();
 
+    // 14-hr window (uses dayStart regardless of specific duty status)
     if (!state.dayStart) {
       dutyTimeEl.textContent = "14:00:00";
       dutyStatusEl.textContent = "Not started";
@@ -864,6 +845,7 @@
       }
     }
 
+    // 11-hr drive limit (only counts while DRIVING)
     const totalDriveSeconds =
       state.driveSecondsUsed +
       (state.dutyStatus === "DRIVING" && state.lastStatusChange
@@ -890,14 +872,14 @@
       driveStatusEl.className = "hos-status";
     }
 
-    const onDutySinceBreakTotal =
-      state.onDutySinceBreakSeconds +
-      ((state.dutyStatus === "DRIVING" || state.dutyStatus === "ON_DUTY") &&
-      state.lastStatusChange
+    // 8-hr / 30-min break clock (driving since last qualifying break)
+    const driveSinceBreakTotal =
+      state.driveSinceBreakSeconds +
+      (state.dutyStatus === "DRIVING" && state.lastStatusChange
         ? secondsBetween(new Date(state.lastStatusChange), current)
         : 0);
 
-    const breakClockRemaining = BREAK_LIMIT_SECONDS - onDutySinceBreakTotal;
+    const breakClockRemaining = BREAK_LIMIT_SECONDS - driveSinceBreakTotal;
     breakTimeEl.textContent = formatHMS(breakClockRemaining);
 
     if (!state.dayStart) {
@@ -921,9 +903,12 @@
             formatHMS(remainingFor30) +
             " to complete 30 mins";
         }
+      } else if (state.dutyStatus === "DRIVING") {
+        breakStatusEl.textContent =
+          "Running – drive time until 30-min break required";
       } else {
         breakStatusEl.textContent =
-          "Running – time until 30-min break required";
+          "Paused – will continue when Driving is selected";
       }
       breakStatusEl.className = "hos-status";
     }
