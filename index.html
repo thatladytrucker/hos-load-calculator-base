@@ -365,7 +365,7 @@
 
   <!-- Recent trips -->
   <section id="recent-trips" class="hos-section">
-    <h2>Recent Trips (last 10)</h2>
+    <h2>Recent Trips (last 8)</h2>
     <div id="recentTripsList" class="recent-list note">
       No trips saved yet.
     </div>
@@ -450,23 +450,32 @@
     recentTrips.forEach(trip=>{
       const div = document.createElement('div');
       div.className = "recent-trip";
+
       const title = document.createElement('div');
       title.className = "recent-trip-title";
       title.textContent = trip.tripId || "(no ID)";
-      const meta = document.createElement('div');
-      meta.className = "recent-trip-meta";
-      meta.textContent =
-        `Start: ${trip.tripStartFmt} • ` +
-        `ETA Shipper: ${trip.etaShFmt} • PTA Consignee: ${trip.ptaCoFmt}`;
+
+      const meta1 = document.createElement('div');
+      meta1.className = "recent-trip-meta";
+      meta1.textContent =
+        `Start: ${trip.tripStartFmt} • Shipper Appt: ${trip.shipApptFmt} • Cons Appt: ${trip.consApptFmt}`;
+
+      const meta2 = document.createElement('div');
+      meta2.className = "recent-trip-meta";
+      meta2.textContent =
+        `DH: ${trip.deadhead} • LD: ${trip.loaded} • Total: ${trip.total} • ETA Sh: ${trip.etaShFmt} • PTA Co: ${trip.ptaCoFmt}`;
+
       div.appendChild(title);
-      div.appendChild(meta);
+      div.appendChild(meta1);
+      div.appendChild(meta2);
       listEl.appendChild(div);
     });
   }
 
   function saveRecentTrip(meta){
     recentTrips.unshift(meta);
-    if(recentTrips.length > 10) recentTrips.length = 10;
+    // keep only last 8 trips
+    if(recentTrips.length > 8) recentTrips.length = 8;
     saveRecentTrips();
     renderRecentTrips();
   }
@@ -599,10 +608,15 @@
 
     showResults(payload);
 
-    // Save to recent trips
+    // Save to recent trips (last 8) with extra fields
     saveRecentTrip({
-      tripId: payload.meta.tripId,
+      tripId,
       tripStartFmt: fmt(tripStart),
+      shipApptFmt: shipAppt ? fmt(shipAppt) : "—",
+      consApptFmt: consAppt ? fmt(consAppt) : "—",
+      deadhead: isFinite(dh) ? dh : 0,
+      loaded: isFinite(lm) ? lm : 0,
+      total: totalMiles,
       etaShFmt: fmt(ETA_SH),
       ptaCoFmt: fmt(PTA_CO),
       createdAt: new Date().toISOString()
