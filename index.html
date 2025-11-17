@@ -191,7 +191,7 @@
           <div class="label">TRIP ID</div>
           <div class="inline">
             <input id="tripId" placeholder="e.g., TEST001" />
-            <button class="btn mutebtn" id="genId" type="button">Auto</button>
+            <button class="btn mutebtn" id="genId">Auto</button>
           </div>
         </div>
         <div>
@@ -265,8 +265,8 @@
       <div class="stickyfoot">
         <div class="hr"></div>
         <div class="inline right">
-          <button id="calc" class="btn" type="button">Calculate</button>
-          <button id="reset" class="btn mutebtn" type="button">Reset</button>
+          <button id="calc" class="btn">Calculate</button>
+          <button id="reset" class="btn mutebtn">Reset</button>
         </div>
       </div>
     </div>
@@ -308,6 +308,7 @@
       <div class="note">
         • Auto 30-min rest break is included when total driving ≥ 8h.  
         • 9/2 rule: when total driving ≥ 9h, PTA after consignee adds +2h buffer +10h rest.  
+        • If total driving > 11h, ETA to consignee includes a 10-hr off-duty reset for the 11-hr rule.  
         • Status colors compare ETA against the appointment (on-time ≤60m early = green; >60m early = yellow; ≥1m late = red).
       </div>
       <div class="note" style="margin-top:10px">
@@ -345,18 +346,13 @@
     <div class="hos-controls">
       <div class="hos-status-buttons">
         <span>Duty Status:</span>
-        <!-- On Duty first -->
         <button data-status="ON_DUTY" class="hos-status-btn">On Duty (Not Driving)</button>
         <button data-status="DRIVING" class="hos-status-btn">Driving</button>
-        <button data-status="BREAK" class="hos-status-btn">
-          Break / Off Duty
-        </button>
-        <button data-status="OFF" class="hos-status-btn">
-          Off (End Day)
-        </button>
+        <button data-status="BREAK" class="hos-status-btn">Break / Off Duty</button>
+        <button data-status="OFF" class="hos-status-btn">Off (End Day)</button>
       </div>
 
-      <button id="btn-reset-hos" class="hos-reset" type="button">
+      <button id="btn-reset-hos" class="hos-reset">
         Reset HOS (after legal 10-hr break)
       </button>
     </div>
@@ -368,7 +364,7 @@
     <div id="recentTripsList" class="recent-list note">
       No trips saved yet.
     </div>
-    <button id="clearTrips" type="button">Clear recent trips</button>
+    <button id="clearTrips">Clear recent trips</button>
   </section>
 
   <!-- Disclaimer -->
@@ -386,8 +382,8 @@
     </span>
   </footer>
 
-  <!-- Floating Let’s Roll button (starts day On Duty) -->
-  <button class="fab" id="btn-lets-roll" type="button">Let’s Roll</button>
+  <!-- Floating Let’s Roll button (HOS clocks only) -->
+  <button class="fab" id="btn-lets-roll">Let’s Roll</button>
 
 <script>
 (function(){
@@ -415,7 +411,7 @@
   }
 
   // --- Recent trips storage helpers ---
-  const RECENT_KEY = "hosRecentTrips_v1";
+  const RECENT_KEY = "hosRecentTrips_v2";
   let recentTrips = [];
 
   function loadRecentTrips(){
@@ -449,17 +445,27 @@
     recentTrips.forEach(trip=>{
       const div = document.createElement('div');
       div.className = "recent-trip";
+
       const title = document.createElement('div');
       title.className = "recent-trip-title";
       title.textContent = trip.tripId || "(no ID)";
-      const meta = document.createElement('div');
-      meta.className = "recent-trip-meta";
-      meta.textContent =
-        `Start: ${trip.tripStartFmt} • Shipper Appt: ${trip.shipperApptFmt} • Consignee Appt: ${trip.consApptFmt} • ` +
-        `DH: ${trip.deadhead} • LD: ${trip.loaded} • TOT: ${trip.totalMiles} • ` +
-        `ETA Shipper: ${trip.etaShFmt} • PTA Consignee: ${trip.ptaCoFmt}`;
+
+      const meta1 = document.createElement('div');
+      meta1.className = "recent-trip-meta";
+      meta1.textContent =
+        `Start: ${trip.tripStartFmt || "—"} • ` +
+        `Shipper Appt: ${trip.shipperApptFmt || "—"} • ` +
+        `Consignee Appt: ${trip.consApptFmt || "—"}`;
+
+      const meta2 = document.createElement('div');
+      meta2.className = "recent-trip-meta";
+      meta2.textContent =
+        `DH: ${trip.dh ?? "—"} • LD: ${trip.lm ?? "—"} • TOT: ${trip.totalMiles ?? "—"} • ` +
+        `ETA Shipper: ${trip.etaShFmt || "—"} • PTA Consignee: ${trip.ptaCoFmt || "—"}`;
+
       div.appendChild(title);
-      div.appendChild(meta);
+      div.appendChild(meta1);
+      div.appendChild(meta2);
       listEl.appendChild(div);
     });
   }
@@ -528,10 +534,14 @@
     $('#ptaCoVal').textContent = fmt(data.ptaCo);
   }
 
-  function explainETA(eta, appt, breakMs=0, bufferMs=0, dwellMs=0){
+  function explainETA(eta, appt, breakMs=0, bufferMs=0, dwellMs=0, extraRestMs=0){
     const parts=[];
     if(breakMs) parts.push('+ 30m rest');
     if(dwellMs) parts.push(`+ ${Math.round(dwellMs/60000)}m dwell`);
+    if(extraRestMs){
+      const h = Math.round(extraRestMs/3600000);
+      parts.push(`+ ${h}h off-duty (11-hr rule)`);
+    }
     if(bufferMs){
       const h = Math.round(bufferMs/3600000);
       parts.push(`+ ${h}h (9/2 rule)`);
@@ -573,10 +583,18 @@
     const breakMs = totalDrivingHrs >= 8 ? minutes(30) : 0;
 
     const driveToConsHrs = (isFinite(lm)?lm:0) / v;
-    const ETA_CO = new Date(PTA_SH.getTime() + hours(driveToConsHrs) + breakMs);
+    let ETA_CO = new Date(PTA_SH.getTime() + hours(driveToConsHrs) + breakMs);
 
     const consDwell = dwell(consStop);
-    const afterConsBufferMs = totalDrivingHrs >= 9 ? hours(12) : 0;
+    let afterConsBufferMs = totalDrivingHrs >= 9 ? hours(12) : 0; // 10h rest + 2h buffer (9/2)
+    let extraRestMs = 0;
+
+    // If total driving exceeds 11 hours, force a 10-hr off-duty reset
+    if (totalDrivingHrs > 11) {
+      extraRestMs = hours(10);
+      ETA_CO = new Date(ETA_CO.getTime() + extraRestMs);
+    }
+
     const PTA_CO = new Date(ETA_CO.getTime() + consDwell + afterConsBufferMs);
 
     const etaSh = statusClass(ETA_SH, shipAppt);
@@ -588,20 +606,20 @@
       etaCo,
       ptaCo: PTA_CO,
       explainSh: explainETA(ETA_SH, shipAppt),
-      explainCo: explainETA(ETA_CO, consAppt, breakMs, afterConsBufferMs, consDwell)
+      explainCo: explainETA(ETA_CO, consAppt, breakMs, afterConsBufferMs, consDwell, extraRestMs)
     };
 
     showResults(payload);
 
-    // Save to recent trips with extra fields
+    // Save to recent trips
     saveRecentTrip({
       tripId,
       tripStartFmt: fmt(tripStart),
-      shipperApptFmt: fmt(shipAppt),
-      consApptFmt: fmt(consAppt),
-      deadhead: isFinite(dh)?dh:0,
-      loaded: isFinite(lm)?lm:0,
-      totalMiles,
+      shipperApptFmt: shipAppt ? fmt(shipAppt) : "—",
+      consApptFmt: consAppt ? fmt(consAppt) : "—",
+      dh: isFinite(dh) ? dh : "",
+      lm: isFinite(lm) ? lm : "",
+      totalMiles: isFinite(totalMiles) ? totalMiles : "",
       etaShFmt: fmt(ETA_SH),
       ptaCoFmt: fmt(PTA_CO),
       createdAt: new Date().toISOString()
@@ -612,7 +630,7 @@
 
   function resetCalculations(){
     document.querySelectorAll('input').forEach(el=>{
-      if(el.type==='range'){ el.value=60; mphVal.textContent=60; }
+      if(el.type==='range'){ el.value=60; $('#mphVal').textContent=60; }
       else if(el.type==='number' || el.type==='datetime-local' || el.type==='text'){ el.value=''; }
     });
     $('#shipperStop').value='DROP30';
@@ -636,7 +654,7 @@
   renderRecentTrips();
 
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('service-worker.js');
+    navigator.serviceWorker.register('sw.js');
   }
 })();
 </script>
@@ -644,38 +662,45 @@
 <!-- HOS clocks logic -->
 <script>
 (function () {
-  const STORAGE_KEY = "hosClocksState_v2"; // bump version so old state doesn't conflict
+  "use strict";
+
+  const STORAGE_KEY = "hosClocksState_v2";
 
   const DUTY_WINDOW_SECONDS = 14 * 3600;
   const DRIVE_LIMIT_SECONDS = 11 * 3600;
-  const BREAK_LIMIT_SECONDS = 8 * 3600;
+  const BREAK_DRIVE_LIMIT_SECONDS = 8 * 3600;   // 8 hours of DRIVING since last 30-min break
   const MIN_BREAK_SECONDS = 30 * 60;
+  const NINE_HOURS_DRIVE_SECONDS = 9 * 3600;
 
-  function baseState() {
+  function defaultState() {
     return {
       dayStart: null,
-      dutyStatus: "OFF",
+      dutyStatus: "OFF",              // OFF | ON_DUTY | DRIVING | BREAK
       lastStatusChange: null,
-      driveSecondsUsed: 0,
-      driveSinceBreakSeconds: 0,
-      breakSecondsCurrentStint: 0
+      driveSecondsUsed: 0,            // total driving today
+      driveSinceBreakSeconds: 0,      // driving since last valid 30-min break
+      breakSecondsCurrentStint: 0     // current BREAK stint length
     };
   }
 
   function loadState() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return baseState();
+      if (!raw) return defaultState();
       const parsed = JSON.parse(raw);
-      return Object.assign(baseState(), parsed);
+      return Object.assign(defaultState(), parsed || {});
     } catch (e) {
       console.error("Failed to load HOS state", e);
-      return baseState();
+      return defaultState();
     }
   }
 
   function saveState() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      console.error("Failed to save HOS state", e);
+    }
   }
 
   let state = loadState();
@@ -714,24 +739,17 @@
     if (delta <= 0) return;
 
     if (state.dutyStatus === "DRIVING") {
-      // Driving time counts toward 11hr and 8hr clocks
       state.driveSecondsUsed += delta;
       state.driveSinceBreakSeconds += delta;
     } else if (state.dutyStatus === "BREAK") {
       state.breakSecondsCurrentStint += delta;
     }
-    // On-duty not driving only affects 14-hr via dayStart, not 11hr/8hr
+
     state.lastStatusChange = current.toISOString();
   }
 
   function setDutyStatus(newStatus) {
     const current = now();
-
-    // Don't allow starting the day directly on DRIVING
-    if (!state.dayStart && newStatus === "DRIVING") {
-      alert('Start your day On Duty before Driving. Select "On Duty (Not Driving)" first.');
-      return;
-    }
 
     if (state.lastStatusChange) {
       applyStatusAccrual();
@@ -739,17 +757,11 @@
       state.lastStatusChange = current.toISOString();
     }
 
-    // Leaving BREAK: if 30m break completed, reset drive-since-break counter
     if (state.dutyStatus === "BREAK") {
       if (state.breakSecondsCurrentStint >= MIN_BREAK_SECONDS) {
         state.driveSinceBreakSeconds = 0;
       }
       state.breakSecondsCurrentStint = 0;
-    }
-
-    // First time going On Duty or Driving: start the 14-hr window
-    if (!state.dayStart && newStatus === "ON_DUTY") {
-      state.dayStart = current.toISOString();
     }
 
     state.dutyStatus = newStatus;
@@ -760,14 +772,22 @@
 
   function startDay() {
     const current = now();
+
     if (!state.dayStart) {
       state.dayStart = current.toISOString();
+      state.driveSecondsUsed = 0;
+      state.driveSinceBreakSeconds = 0;
+      state.breakSecondsCurrentStint = 0;
     }
-    setDutyStatus("ON_DUTY");
+
+    state.dutyStatus = "ON_DUTY";
+    state.lastStatusChange = current.toISOString();
+    saveState();
+    updateUI();
   }
 
   function resetHOS() {
-    state = baseState();
+    state = defaultState();
     saveState();
     updateUI();
   }
@@ -821,7 +841,7 @@
 
     const current = now();
 
-    // 14-hr window (uses dayStart regardless of specific duty status)
+    // 14-hour duty window
     if (!state.dayStart) {
       dutyTimeEl.textContent = "14:00:00";
       dutyStatusEl.textContent = "Not started";
@@ -845,7 +865,7 @@
       }
     }
 
-    // 11-hr drive limit (only counts while DRIVING)
+    // Driving clocks
     const totalDriveSeconds =
       state.driveSecondsUsed +
       (state.dutyStatus === "DRIVING" && state.lastStatusChange
@@ -861,6 +881,10 @@
     } else if (driveRemaining <= 0) {
       driveStatusEl.textContent = "EXPIRED – 11-hr drive limit";
       driveStatusEl.className = "hos-status hos-expired";
+    } else if (totalDriveSeconds >= NINE_HOURS_DRIVE_SECONDS && driveRemaining > 0) {
+      driveStatusEl.textContent =
+        "9/2 rule: ≥9h driving — start parking, shut down, then 10h off + 2h buffer.";
+      driveStatusEl.className = "hos-status hos-warning";
     } else if (driveRemaining <= 3600) {
       driveStatusEl.textContent = "Warning – less than 1 hr drive left";
       driveStatusEl.className = "hos-status hos-warning";
@@ -872,45 +896,47 @@
       driveStatusEl.className = "hos-status";
     }
 
-    // 8-hr / 30-min break clock (driving since last qualifying break)
-    const driveSinceBreakTotal =
+    // 8-hour / 30-min break (DRIVING only)
+    const drivingSinceBreakSeconds =
       state.driveSinceBreakSeconds +
       (state.dutyStatus === "DRIVING" && state.lastStatusChange
         ? secondsBetween(new Date(state.lastStatusChange), current)
         : 0);
 
-    const breakClockRemaining = BREAK_LIMIT_SECONDS - driveSinceBreakTotal;
-    breakTimeEl.textContent = formatHMS(breakClockRemaining);
+    const anyDrivingYet = totalDriveSeconds > 0;
 
-    if (!state.dayStart) {
+    if (!state.dayStart || !anyDrivingYet) {
+      breakTimeEl.textContent = "08:00:00";
       breakStatusEl.textContent = "Not started";
       breakStatusEl.className = "hos-status";
-    } else if (breakClockRemaining <= 0) {
-      breakStatusEl.textContent = "BREAK REQUIRED – 30-min off duty needed";
-      breakStatusEl.className = "hos-status hos-expired";
-    } else if (breakClockRemaining <= 3600) {
-      breakStatusEl.textContent = "Warning – less than 1 hr to 30-min break";
-      breakStatusEl.className = "hos-status hos-warning";
     } else {
-      if (state.dutyStatus === "BREAK") {
-        if (state.breakSecondsCurrentStint >= MIN_BREAK_SECONDS) {
-          breakStatusEl.textContent = "30-min break completed";
-        } else {
-          const remainingFor30 =
-            MIN_BREAK_SECONDS - state.breakSecondsCurrentStint;
-          breakStatusEl.textContent =
-            "On break – " +
-            formatHMS(remainingFor30) +
-            " to complete 30 mins";
-        }
-      } else if (state.dutyStatus === "DRIVING") {
-        breakStatusEl.textContent =
-          "Running – drive time until 30-min break required";
+      const breakClockRemaining = BREAK_DRIVE_LIMIT_SECONDS - drivingSinceBreakSeconds;
+      breakTimeEl.textContent = formatHMS(breakClockRemaining);
+
+      if (breakClockRemaining <= 0) {
+        breakStatusEl.textContent = "BREAK REQUIRED – 30-min off duty needed";
+        breakStatusEl.className = "hos-status hos-expired";
+      } else if (breakClockRemaining <= 3600) {
+        breakStatusEl.textContent = "Warning – less than 1 hr to 30-min break";
+        breakStatusEl.className = "hos-status hos-warning";
       } else {
-        breakStatusEl.textContent =
-          "Paused – will continue when Driving is selected";
+        if (state.dutyStatus === "BREAK") {
+          if (state.breakSecondsCurrentStint >= MIN_BREAK_SECONDS) {
+            breakStatusEl.textContent = "30-min break completed";
+          } else {
+            const remainingFor30 =
+              MIN_BREAK_SECONDS - state.breakSecondsCurrentStint;
+            breakStatusEl.textContent =
+              "On break – " +
+              formatHMS(remainingFor30) +
+              " to complete 30 mins";
+          }
+        } else {
+          breakStatusEl.textContent =
+            "Running – time until 30-min break required";
+        }
+        breakStatusEl.className = "hos-status";
       }
-      breakStatusEl.className = "hos-status";
     }
 
     updateStatusButtons();
@@ -920,7 +946,7 @@
   setInterval(updateUI, 1000);
   updateUI();
 
-  // expose hooks for Reset button
+  // expose hooks for main script
   window.hosResetDay = resetHOS;
   window.hosHasActiveDay = function(){ return !!state.dayStart; };
 })();
