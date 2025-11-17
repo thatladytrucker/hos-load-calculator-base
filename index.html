@@ -1,170 +1,350 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>HOS Load Calculator — v6.1a (Baseline)</title>
-
-  <!-- PWA basics -->
-  <meta name="theme-color" content="#0f172a" />
-  <link rel="manifest" href="manifest.webmanifest" />
-  <!-- icons (put pngs in /icons) -->
-  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
-  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png" />
-  <link rel="apple-touch-icon" href="icons/icon-180.png" />
-
-  <!-- App styles -->
-  <link rel="stylesheet" href="styles.css" />
-
-  <!-- Minimal dark fallback so page isn't bright if CSS hasn't loaded yet -->
-  <style>
-    :root{
-      --bg:#0f172a;        /* slate-900 */
-      --card:#111827;      /* gray-900 */
-      --text:#e5e7eb;      /* gray-200 */
-      --muted:#94a3b8;     /* slate-400 */
-      --accent:#60a5fa;    /* blue-400 */
-      --good:#10b981;      /* emerald-500 */
-      --bad:#ef4444;       /* red-500 */
-      --warn:#f59e0b;      /* amber-500 */
-      --btn:#3b82f6;       /* blue-500 */
-      --btnText:#ffffff;
-      --radius:14px;
-    }
-    *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-    body{margin:0;background:var(--bg);color:var(--text)}
-    .container{max-width:960px;margin:auto;padding:16px}
-    header, footer{display:flex;gap:12px;align-items:center;justify-content:space-between}
-    .title{font-weight:700;font-size:1.1rem;letter-spacing:.2px}
-    .card{background:var(--card);border:1px solid #1f2937;border-radius:var(--radius);padding:14px}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    @media (max-width:720px){.row{grid-template-columns:1fr}}
-    label{font-size:.85rem;color:var(--muted);display:block;margin-bottom:6px}
-    input,select{width:100%;background:#0b1220;color:var(--text);border:1px solid #1f2937;border-radius:10px;padding:10px}
-    .btnbar{display:flex;gap:8px;flex-wrap:wrap}
-    button{background:var(--btn);color:var(--btnText);border:0;border-radius:12px;padding:10px 14px;font-weight:600}
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;font-weight:600}
-    .pill.good{background:rgba(16,185,129,.12);color:var(--good)}
-    .pill.bad{background:rgba(239,68,68,.12);color:var(--bad)}
-    .pill.warn{background:rgba(245,158,11,.12);color:var(--warn)}
-    small.disclaimer{color:var(--muted);font-size:.78rem;line-height:1.3}
-    a{color:var(--accent);text-decoration:none}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>HOS Load Calculator (Offline)</title>
+<meta name="theme-color" content="#0f172a" />
+<style>
+  :root{
+    --bg:#0b1020; --card:#111936; --ink:#e6ecff; --muted:#96a2c7;
+    --accent:#3b82f6; --ok:#16a34a; --warn:#eab308; --late:#dc2626; --chip:#1f2a4d;
+    --outline:#2b3a6b;
+  }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{
+    margin:0; background:linear-gradient(180deg,#0a0f1f, #0b0f2a 40%, #0a0f1f);
+    color:var(--ink); font:500 16px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
+    -webkit-font-smoothing:antialiased; padding:18px;
+  }
+  h1{font-size:20px;margin:0 0 12px}
+  .sub{color:var(--muted); font-size:13px; margin:4px 0 16px}
+  .grid{display:grid; gap:12px}
+  .card{background:var(--card); border:1px solid var(--outline); border-radius:14px; padding:14px}
+  .row{display:grid; gap:10px}
+  .row.cols-2{grid-template-columns:1fr 1fr}
+  .row.cols-3{grid-template-columns:1fr 1fr 1fr}
+  .label{font-size:12px;color:var(--muted); margin-bottom:6px}
+  input, select{
+    width:100%; background:#0a1330; color:var(--ink);
+    border:1px solid var(--outline); border-radius:12px; padding:10px 12px; outline:none;
+  }
+  input[type="range"]{height:36px; padding:0}
+  .inline{display:flex; gap:8px; align-items:center}
+  .btn{
+    background:var(--accent); color:white; border:none; padding:10px 14px; border-radius:10px;
+    font-weight:600; cursor:pointer
+  }
+  .mutebtn{background:#1b2447; color:var(--ink)}
+  .capsule{
+    display:flex; justify-content:space-between; align-items:center;
+    background:var(--chip); border:1px solid var(--outline); border-radius:999px; padding:10px 14px;
+    font-weight:600
+  }
+  .stat{padding:4px 10px; border-radius:999px; font-size:12px; font-weight:800}
+  .ok{background:color-mix(in oklab, var(--ok) 25%, transparent); border:1px solid var(--ok)}
+  .warn{background:color-mix(in oklab, var(--warn) 25%, transparent); border:1px solid var(--warn)}
+  .late{background:color-mix(in oklab, var(--late) 25%, transparent); border:1px solid var(--late)}
+  .note{color:var(--muted); font-size:12px}
+  .hr{height:1px;background:var(--outline); margin:10px 0}
+  .pill{background:#0c1537; padding:6px 10px; border-radius:999px; border:1px solid var(--outline); font-size:12px}
+  .right{justify-content:flex-end}
+  .stickyfoot{position:sticky; bottom:0; padding-top:10px; background:linear-gradient(180deg,transparent, rgba(11,15,32,.95) 30%);}
+  .fab{
+    position:fixed; right:16px; bottom:16px; z-index:9999;
+    background:var(--ok); color:white; border:none; border-radius:999px;
+    padding:14px 18px; font-weight:800; box-shadow:0 8px 24px rgba(0,0,0,.35); cursor:pointer;
+  }
+  .fab:active{transform:translateY(1px)}
+</style>
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" sizes="192x192" href="icons/app-192.png">
+<link rel="apple-touch-icon" href="icons/app-180.png">
 </head>
 <body>
-  <noscript>
-    <div class="container">
-      <p class="card">This app needs JavaScript to run.</p>
-    </div>
-  </noscript>
+  <h1>HOS Load Calculator (Offline)</h1>
+  <div class="sub">Driver workflow: enter trip → check ETAs/PTAs → color status vs appointment.</div>
 
-  <div class="container">
-    <!-- HEADER -->
-    <header>
-      <div class="title">TOYA’S HOS LOAD CALCULATOR <span style="opacity:.6">v6.1a</span></div>
-      <div class="pill warn" id="netStatus">PWA: offline-ready</div>
-    </header>
+  <div class="grid">
+    <div class="card">
+      <div class="row cols-2">
+        <div>
+          <div class="label">TRIP ID</div>
+          <div class="inline">
+            <input id="tripId" placeholder="e.g., TEST001" />
+            <button class="btn mutebtn" id="genId">Auto</button>
+          </div>
+        </div>
+        <div>
+          <div class="label">AVG (MPH) — 50 to 75</div>
+          <div class="inline">
+            <input id="mph" type="range" min="50" max="75" step="1" value="60" />
+            <span class="pill"><span id="mphVal">60</span> MPH</span>
+          </div>
+        </div>
+      </div>
 
-    <!-- INPUTS -->
-    <section class="card" aria-labelledby="inputsTitle">
-      <h2 id="inputsTitle" style="margin:0 0 8px 0;font-size:1rem">Driver Inputs</h2>
+      <div class="hr"></div>
       <div class="row">
         <div>
-          <label for="eta">Planned ETA (local)</label>
-          <input type="time" id="eta" />
+          <div class="label">TRIP START</div>
+          <input id="tripStart" type="datetime-local" />
+        </div>
+      </div>
+
+      <div class="row cols-3">
+        <div>
+          <div class="label">DEADHEAD MILES</div>
+          <input id="deadhead" type="number" inputmode="decimal" min="0" placeholder="e.g., 100" />
         </div>
         <div>
-          <label for="pta">PTA (Projected Time Available)</label>
-          <input type="time" id="pta" />
+          <div class="label">LOADED MILES</div>
+          <input id="loaded" type="number" inputmode="decimal" min="0" placeholder="e.g., 500" />
         </div>
         <div>
-          <label for="driveHrs">Drive hours remaining</label>
-          <input type="number" id="driveHrs" min="0" step="0.25" placeholder="e.g., 6.5" />
+          <div class="label">TOTAL MILES</div>
+          <input id="total" type="number" readonly tabindex="-1" />
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row cols-2">
+        <div>
+          <div class="label">SHIPPER APPOINTMENT</div>
+          <input id="shipperAppt" type="datetime-local" />
         </div>
         <div>
-          <label for="split">8/2 Split?</label>
-          <select id="split">
-            <option value="none">No</option>
-            <option value="8-2">8/2 Eligible</option>
+          <div class="label">SHIPPER STOP TYPE</div>
+          <select id="shipperStop">
+            <option value="DROP30">Drop 30</option>
+            <option value="DROP60">Drop 60</option>
+            <option value="LIVE60">Live 60</option>
+            <option value="LIVE120">Live 120</option>
+            <option value="BACKHAUL90">Backhaul 90</option>
           </select>
         </div>
       </div>
-      <div class="btnbar" style="margin-top:12px">
-        <button id="calcBtn">Calculate</button>
-        <button id="resetBtn" type="button">Reset</button>
-        <button id="helpBtn" type="button">Help</button>
-      </div>
-    </section>
 
-    <!-- STATUS / OUTPUTS -->
-    <section class="card" aria-labelledby="statusTitle" style="margin-top:12px">
-      <h2 id="statusTitle" style="margin:0 0 8px 0;font-size:1rem">Status & Outputs</h2>
+      <div class="row cols-2">
+        <div>
+          <div class="label">CONSIGNEE APPOINTMENT</div>
+          <input id="consAppt" type="datetime-local" />
+        </div>
+        <div>
+          <div class="label">CONSIGNEE STOP TYPE</div>
+          <select id="consStop">
+            <option value="DROP30">Drop 30</option>
+            <option value="DROP60">Drop 60</option>
+            <option value="LIVE60">Live 60</option>
+            <option value="LIVE120">Live 120</option>
+            <option value="BACKHAUL90">Backhaul 90</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="stickyfoot">
+        <div class="hr"></div>
+        <div class="inline right">
+          <button id="calc" class="btn">Calculate</button>
+          <button id="reset" class="btn mutebtn">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="results" style="display:none">
+      <div class="label">Driver Output</div>
+
       <div class="row">
-        <div class="card" style="background:#0b1220">
-          <label>On-Time Status</label>
-          <div id="ontimePill" class="pill good">On time</div>
+        <div class="capsule" id="etaShCaps">
+          <div>ETA TO SHIPPER</div>
+          <div class="stat" id="etaShStat">—</div>
         </div>
-        <div class="card" style="background:#0b1220">
-          <label>Projected Arrival</label>
-          <div id="projectedArrival" class="pill">—</div>
-        </div>
-        <div class="card" style="background:#0b1220">
-          <label>Notes</label>
-          <div id="notes" style="color:var(--muted)">—</div>
+        <div class="small note" id="etaShExplain"></div>
+      </div>
+
+      <div class="row">
+        <div class="capsule">
+          <div>PTA AFTER STOP</div>
+          <div class="stat pill" id="ptaShVal">—</div>
         </div>
       </div>
-    </section>
 
-    <!-- DISCLAIMER -->
-    <section class="card" style="margin-top:12px">
-      <h3 style="margin:0 0 6px 0;font-size:1rem">Disclaimer</h3>
-      <small class="disclaimer">
-        This tool is for planning and training only. It does not replace FMCSA regulations, carrier policy,
-        or your ELD. Always follow posted laws, your dispatcher’s instructions, and facility rules.
-        Use at your own risk.
-      </small>
-    </section>
+      <div class="row">
+        <div class="capsule" id="etaCoCaps">
+          <div>ETA TO CONSIGNEE</div>
+          <div class="stat" id="etaCoStat">—</div>
+        </div>
+        <div class="small note" id="etaCoExplain"></div>
+      </div>
 
-    <!-- FOOTER -->
-    <footer style="margin-top:16px">
-      <small class="disclaimer">© <span id="year"></span> Toya Cramsey. All rights reserved.</small>
-      <a href="#" id="installLink" hidden>Install App</a>
-    </footer>
+      <div class="row">
+        <div class="capsule">
+          <div>PTA AFTER CONSIGNEE</div>
+          <div class="stat pill" id="ptaCoVal">—</div>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+      <div class="note">
+        • Auto 30-min rest break is included when total driving ≥ 8h.  
+        • 9/2 rule: when total driving ≥ 9h, PTA after consignee adds +2h buffer +10h rest.  
+        • Status colors compare ETA against the appointment (on-time ≤60m early = green; >60m early = yellow; ≥1m late = red).
+      </div>
+      <div class="note" style="margin-top:10px">
+        © 2025 Toya Cramsey (ArtsnCrabs). All rights reserved. For guidance only — driver remains responsible for HOS compliance.
+      </div>
+    </div>
   </div>
 
-  <!-- App logic & PWA registration -->
-  <script src="app.js"></script>
-  <script>
-    <script src="app.js"></script>
-  <script>
-    // tiny helper so footer year is correct even without app.js
-    document.getElementById("year").textContent = new Date().getFullYear();
-  </script>
+  <button class="fab" id="fabRoll">Let’s Roll</button>
 
-  <!-- Service Worker Registration -->
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker
-          .register("/service-worker.js")
-          .then((registration) => {
-            console.log("Service Worker registered with scope:", registration.scope);
-          })
-          .catch((error) => {
-            console.log("Service Worker registration failed:", error);
-          });
-      });
+<script>
+(function(){
+  "use strict";
+
+  const $ = sel => document.querySelector(sel);
+  const fmt = d => d ? new Intl.DateTimeFormat(undefined, {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).format(d) : '—';
+  const hours = h => h * 3600 * 1000;
+  const minutes = m => m * 60 * 1000;
+
+  const dwell = code => ({
+    'DROP30': minutes(30),
+    'DROP60': minutes(60),
+    'LIVE60': minutes(60),
+    'LIVE120': minutes(120),
+    'BACKHAUL90': minutes(90)
+  }[code] ?? 0);
+
+  function statusClass(eta, appt){
+    if(!eta || !appt) return {label: fmt(eta), cls: ''};
+    const diffMin = Math.round((appt - eta)/60000);
+    if(diffMin < 0){ return {label: fmt(eta) + ' • LATE', cls:'late'}; }
+    if(diffMin > 60){ return {label: fmt(eta) + ' • TOO EARLY', cls:'warn'}; }
+    return {label: fmt(eta) + ' • ON TIME', cls:'ok'};
+  }
+
+  $('#genId').addEventListener('click', ()=>{
+    const now = new Date();
+    const stamp = now.toISOString().replace(/\D/g,'').slice(2,12);
+    $('#tripId').value = 'TRIP' + stamp;
+  });
+
+  const mph = $('#mph'), mphVal = $('#mphVal'); 
+  mph.addEventListener('input', ()=> mphVal.textContent = mph.value);
+  mphVal.textContent = mph.value;
+
+  function recalcTotal(){
+    const d = parseFloat($('#deadhead').value||0);
+    const l = parseFloat($('#loaded').value||0);
+    $('#total').value = isFinite(d+l) ? (d+l) : '';
+  }
+  $('#deadhead').addEventListener('input', recalcTotal);
+  $('#loaded').addEventListener('input', recalcTotal);
+
+  function runCalc(){
+    const tripStart = valDate($('#tripStart').value);
+    const dh = parseFloat($('#deadhead').value||0);
+    const lm = parseFloat($('#loaded').value||0);
+    const v = Math.max(50, Math.min(75, parseFloat($('#mph').value||60)));
+    const shipAppt = valDate($('#shipperAppt').value);
+    const consAppt = valDate($('#consAppt').value);
+    const shipStop = $('#shipperStop').value;
+    const consStop = $('#consStop').value;
+
+    const totalMiles = (isFinite(dh)?dh:0) + (isFinite(lm)?lm:0);
+    $('#total').value = totalMiles;
+
+    if(!tripStart || v<=0){
+      showResults(null);
+      alert('Enter at least: Trip Start, MPH, and miles.');
+      return;
     }
-  </script>
 
+    const driveToShipperHrs = (isFinite(dh)?dh:0) / v;
+    const ETA_SH = new Date(tripStart.getTime() + hours(driveToShipperHrs));
+    const PTA_SH = new Date(ETA_SH.getTime() + dwell(shipStop));
+
+    const totalDrivingHrs = ((isFinite(dh)?dh:0) + (isFinite(lm)?lm:0)) / v;
+    const breakMs = totalDrivingHrs >= 8 ? minutes(30) : 0;
+
+    const driveToConsHrs = (isFinite(lm)?lm:0) / v;
+    const ETA_CO = new Date(PTA_SH.getTime() + hours(driveToConsHrs) + breakMs);
+
+    const consDwell = dwell(consStop);
+    const afterConsBufferMs = totalDrivingHrs >= 9 ? hours(12) : 0;
+    const PTA_CO = new Date(ETA_CO.getTime() + consDwell + afterConsBufferMs);
+
+    const etaSh = statusClass(ETA_SH, shipAppt);
+    const etaCo = statusClass(ETA_CO, consAppt);
+
+    showResults({
+      etaSh, ptaSh: PTA_SH, etaCo, ptaCo: PTA_CO,
+      explainSh: explainETA(ETA_SH, shipAppt),
+      explainCo: explainETA(ETA_CO, consAppt, breakMs, afterConsBufferMs, consDwell)
+    });
+  }
+
+  $('#calc').addEventListener('click', runCalc);
+  $('#fabRoll').addEventListener('click', runCalc);
+
+  $('#reset').addEventListener('click', ()=>{
+    document.querySelectorAll('input').forEach(el=>{
+      if(el.type==='range'){ el.value=60; mphVal.textContent=60; }
+      else if(el.type==='number' || el.type==='datetime-local' || el.type==='text'){ el.value=''; }
+    });
+    $('#shipperStop').value='DROP30';
+    $('#consStop').value='DROP30';
+    $('#results').style.display='none';
+  });
+
+  function valDate(s){
+    if(!s) return null;
+    const d = new Date(s);
+    return isNaN(d) ? null : d;
+  }
+
+  function showResults(data){
+    const wrap = $('#results');
+    if(!data){ wrap.style.display='none'; return; }
+    wrap.style.display='block';
+
+    const etaShStat = $('#etaShStat'), etaShExplain = $('#etaShExplain');
+    etaShStat.textContent = data.etaSh.label;
+    etaShStat.className = 'stat ' + (data.etaSh.cls||'');
+    etaShExplain.textContent = data.explainSh;
+
+    $('#ptaShVal').textContent = fmt(data.ptaSh);
+
+    const etaCoStat = $('#etaCoStat'), etaCoExplain = $('#etaCoExplain');
+    etaCoStat.textContent = data.etaCo.label;
+    etaCoStat.className = 'stat ' + (data.etaCo.cls||'');
+    etaCoExplain.textContent = data.explainCo;
+
+    $('#ptaCoVal').textContent = fmt(data.ptaCo);
+  }
+
+  function explainETA(eta, appt, breakMs=0, bufferMs=0, dwellMs=0){
+    const parts=[];
+    if(breakMs) parts.push('+ 30m rest');
+    if(dwellMs) parts.push(`+ ${Math.round(dwellMs/60000)}m dwell`);
+    if(bufferMs){
+      const h = Math.round(bufferMs/3600000);
+      parts.push(`+ ${h}h (9/2 rule)`);
+    }
+    if(appt){
+      const diffMin = Math.round((appt - eta)/60000);
+      if(diffMin<0) parts.push(`${Math.abs(diffMin)} min late`);
+      else if(diffMin>60) parts.push(`${Math.abs(diffMin)} min early`);
+      else parts.push('within 60 min window');
+    }
+    return parts.length? parts.join(' • ') : '';
+  }
+
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js');
+  }
+})();
+</script>
 </body>
 </html>
-   
-    
-    
-    
-    
-    
-    
-    
-    
