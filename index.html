@@ -56,6 +56,125 @@
     padding:14px 18px; font-weight:800; box-shadow:0 8px 24px rgba(0,0,0,.35); cursor:pointer;
   }
   .fab:active{transform:translateY(1px)}
+
+  /* HOS clocks layout */
+  .hos-section {
+    margin-top: 18px;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid var(--outline);
+    background:#020617;
+  }
+  .hos-section h2 {
+    margin: 0 0 10px;
+    font-size: 16px;
+  }
+  .hos-clock-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px,1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .hos-clock-card {
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid var(--outline);
+    background:#0b1120;
+  }
+  .hos-time {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .hos-status {
+    font-size: 11px;
+    margin-top: 4px;
+    color: var(--muted);
+  }
+  .hos-controls {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    margin-top:8px;
+  }
+  .hos-status-buttons {
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    align-items:center;
+    font-size:12px;
+  }
+  .hos-status-btn,
+  #btn-reset-hos {
+    padding:6px 10px;
+    border-radius:999px;
+    border:none;
+    cursor:pointer;
+    background:#1f2937;
+    color:#f9fafb;
+    font-size:12px;
+  }
+  .hos-status-btn.active {
+    outline:2px solid #10b981;
+    background:#065f46;
+  }
+  #btn-reset-hos {
+    background:#4b5563;
+    font-size:11px;
+  }
+  .hos-expired {
+    color:#f97373;
+  }
+  .hos-warning {
+    color:#facc15;
+  }
+
+  /* Recent trips */
+  .recent-list {
+    margin-top:6px;
+    font-size:12px;
+  }
+  .recent-trip {
+    padding:6px 8px;
+    border-radius:8px;
+    border:1px solid var(--outline);
+    margin-bottom:4px;
+    background:#020617;
+  }
+  .recent-trip-title {
+    font-weight:600;
+    font-size:12px;
+  }
+  .recent-trip-meta {
+    font-size:11px;
+    color:var(--muted);
+  }
+  #clearTrips {
+    margin-top:6px;
+    padding:6px 10px;
+    border-radius:999px;
+    border:none;
+    background:#4b5563;
+    color:#f9fafb;
+    font-size:11px;
+    cursor:pointer;
+  }
+
+  .hos-disclaimer {
+    margin-top: 18px;
+    padding: 10px 12px;
+    font-size: 11px;
+    line-height: 1.4;
+    border-top: 1px solid var(--outline);
+    color: var(--muted);
+    background:#020617;
+  }
+  .hos-disclaimer strong {
+    display:block;
+    margin-bottom:3px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+  }
 </style>
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" sizes="192x192" href="icons/app-192.png">
@@ -197,7 +316,79 @@
     </div>
   </div>
 
-  <button class="fab" id="fabRoll">Let’s Roll</button>
+  <!-- HOS clocks section -->
+  <section id="hos-clocks" class="hos-section">
+    <h2>HOS Clocks</h2>
+
+    <div class="hos-clock-grid">
+      <div class="hos-clock-card">
+        <h3>14-Hr On-Duty Window</h3>
+        <div id="duty-window-time" class="hos-time">14:00:00</div>
+        <div id="duty-window-status" class="hos-status">Not started</div>
+      </div>
+
+      <div class="hos-clock-card">
+        <h3>11-Hr Drive Time</h3>
+        <div id="drive-time" class="hos-time">11:00:00</div>
+        <div id="drive-status" class="hos-status">Not started</div>
+      </div>
+
+      <div class="hos-clock-card">
+        <h3>8-Hr / 30-Min Break</h3>
+        <div id="break-clock-time" class="hos-time">08:00:00</div>
+        <div id="break-clock-status" class="hos-status">
+          Not started
+        </div>
+      </div>
+    </div>
+
+    <div class="hos-controls">
+      <div class="hos-status-buttons">
+        <span>Duty Status:</span>
+        <button data-status="DRIVING" class="hos-status-btn">Driving</button>
+        <button data-status="ON_DUTY" class="hos-status-btn">
+          On Duty (Not Driving)
+        </button>
+        <button data-status="BREAK" class="hos-status-btn">
+          Break / Off Duty
+        </button>
+        <button data-status="OFF" class="hos-status-btn">
+          Off (End Day)
+        </button>
+      </div>
+
+      <button id="btn-reset-hos" class="hos-reset">
+        Reset HOS (after legal 10-hr break)
+      </button>
+    </div>
+  </section>
+
+  <!-- Recent trips -->
+  <section id="recent-trips" class="hos-section">
+    <h2>Recent Trips (last 10)</h2>
+    <div id="recentTripsList" class="recent-list note">
+      No trips saved yet.
+    </div>
+    <button id="clearTrips">Clear recent trips</button>
+  </section>
+
+  <!-- Disclaimer -->
+  <footer id="hos-disclaimer" class="hos-disclaimer">
+    <strong>Disclaimer:</strong>
+    <span>
+      This HOS Load Calculator and its clocks are planning and training tools only.
+      They do not replace your official ELD, paper log, or any FMCSA-required
+      records. Calculations are based on general FMCSA 14-hour, 11-hour, and
+      8-hour/30-minute rules and may not reflect all exceptions, split sleeper
+      provisions, exemptions, company policies, or time zone differences. The
+      driver and motor carrier remain fully responsible for complying with all
+      applicable laws, regulations, and company rules at all times. Always follow
+      your official log and FMCSA guidance if there is any conflict.
+    </span>
+  </footer>
+
+  <!-- Floating Let’s Roll button (HOS clocks only) -->
+  <button class="fab" id="btn-lets-roll">Let’s Roll</button>
 
 <script>
 (function(){
@@ -224,6 +415,75 @@
     return {label: fmt(eta) + ' • ON TIME', cls:'ok'};
   }
 
+  // --- Recent trips storage helpers ---
+  const RECENT_KEY = "hosRecentTrips_v1";
+  let recentTrips = [];
+
+  function loadRecentTrips(){
+    try{
+      const raw = localStorage.getItem(RECENT_KEY);
+      if(!raw) return [];
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr : [];
+    }catch(e){
+      console.error("Recent trips load error", e);
+      return [];
+    }
+  }
+
+  function saveRecentTrips(){
+    try{
+      localStorage.setItem(RECENT_KEY, JSON.stringify(recentTrips));
+    }catch(e){
+      console.error("Recent trips save error", e);
+    }
+  }
+
+  function renderRecentTrips(){
+    const listEl = $('#recentTripsList');
+    if(!listEl) return;
+    if(!recentTrips.length){
+      listEl.textContent = "No trips saved yet.";
+      return;
+    }
+    listEl.innerHTML = "";
+    recentTrips.forEach(trip=>{
+      const div = document.createElement('div');
+      div.className = "recent-trip";
+      const title = document.createElement('div');
+      title.className = "recent-trip-title";
+      title.textContent = trip.tripId || "(no ID)";
+      const meta = document.createElement('div');
+      meta.className = "recent-trip-meta";
+      meta.textContent =
+        `Start: ${trip.tripStartFmt} • ` +
+        `ETA Shipper: ${trip.etaShFmt} • PTA Consignee: ${trip.ptaCoFmt}`;
+      div.appendChild(title);
+      div.appendChild(meta);
+      listEl.appendChild(div);
+    });
+  }
+
+  function saveRecentTrip(meta){
+    recentTrips.unshift(meta);
+    if(recentTrips.length > 10) recentTrips.length = 10;
+    saveRecentTrips();
+    renderRecentTrips();
+  }
+
+  const clearBtn = $('#clearTrips');
+  if(clearBtn){
+    clearBtn.addEventListener('click', ()=>{
+      if(confirm("Clear all recent trips from this device?")){
+        recentTrips = [];
+        saveRecentTrips();
+        renderRecentTrips();
+      }
+    });
+  }
+
+  // --- Existing UI wiring ---
+
   $('#genId').addEventListener('click', ()=>{
     const now = new Date();
     const stamp = now.toISOString().replace(/\D/g,'').slice(2,12);
@@ -241,62 +501,6 @@
   }
   $('#deadhead').addEventListener('input', recalcTotal);
   $('#loaded').addEventListener('input', recalcTotal);
-
-  function runCalc(){
-    const tripStart = valDate($('#tripStart').value);
-    const dh = parseFloat($('#deadhead').value||0);
-    const lm = parseFloat($('#loaded').value||0);
-    const v = Math.max(50, Math.min(75, parseFloat($('#mph').value||60)));
-    const shipAppt = valDate($('#shipperAppt').value);
-    const consAppt = valDate($('#consAppt').value);
-    const shipStop = $('#shipperStop').value;
-    const consStop = $('#consStop').value;
-
-    const totalMiles = (isFinite(dh)?dh:0) + (isFinite(lm)?lm:0);
-    $('#total').value = totalMiles;
-
-    if(!tripStart || v<=0){
-      showResults(null);
-      alert('Enter at least: Trip Start, MPH, and miles.');
-      return;
-    }
-
-    const driveToShipperHrs = (isFinite(dh)?dh:0) / v;
-    const ETA_SH = new Date(tripStart.getTime() + hours(driveToShipperHrs));
-    const PTA_SH = new Date(ETA_SH.getTime() + dwell(shipStop));
-
-    const totalDrivingHrs = ((isFinite(dh)?dh:0) + (isFinite(lm)?lm:0)) / v;
-    const breakMs = totalDrivingHrs >= 8 ? minutes(30) : 0;
-
-    const driveToConsHrs = (isFinite(lm)?lm:0) / v;
-    const ETA_CO = new Date(PTA_SH.getTime() + hours(driveToConsHrs) + breakMs);
-
-    const consDwell = dwell(consStop);
-    const afterConsBufferMs = totalDrivingHrs >= 9 ? hours(12) : 0;
-    const PTA_CO = new Date(ETA_CO.getTime() + consDwell + afterConsBufferMs);
-
-    const etaSh = statusClass(ETA_SH, shipAppt);
-    const etaCo = statusClass(ETA_CO, consAppt);
-
-    showResults({
-      etaSh, ptaSh: PTA_SH, etaCo, ptaCo: PTA_CO,
-      explainSh: explainETA(ETA_SH, shipAppt),
-      explainCo: explainETA(ETA_CO, consAppt, breakMs, afterConsBufferMs, consDwell)
-    });
-  }
-
-  $('#calc').addEventListener('click', runCalc);
-  $('#fabRoll').addEventListener('click', runCalc);
-
-  $('#reset').addEventListener('click', ()=>{
-    document.querySelectorAll('input').forEach(el=>{
-      if(el.type==='range'){ el.value=60; mphVal.textContent=60; }
-      else if(el.type==='number' || el.type==='datetime-local' || el.type==='text'){ el.value=''; }
-    });
-    $('#shipperStop').value='DROP30';
-    $('#consStop').value='DROP30';
-    $('#results').style.display='none';
-  });
 
   function valDate(s){
     if(!s) return null;
@@ -341,9 +545,385 @@
     return parts.length? parts.join(' • ') : '';
   }
 
+  function runCalc(){
+    const tripStart = valDate($('#tripStart').value);
+    const dh = parseFloat($('#deadhead').value||0);
+    const lm = parseFloat($('#loaded').value||0);
+    const v = Math.max(50, Math.min(75, parseFloat($('#mph').value||60)));
+    const shipAppt = valDate($('#shipperAppt').value);
+    const consAppt = valDate($('#consAppt').value);
+    const shipStop = $('#shipperStop').value;
+    const consStop = $('#consStop').value;
+    const tripId = $('#tripId').value || '';
+
+    const totalMiles = (isFinite(dh)?dh:0) + (isFinite(lm)?lm:0);
+    $('#total').value = totalMiles;
+
+    if(!tripStart || v<=0){
+      showResults(null);
+      alert('Enter at least: Trip Start, MPH, and miles.');
+      return;
+    }
+
+    const driveToShipperHrs = (isFinite(dh)?dh:0) / v;
+    const ETA_SH = new Date(tripStart.getTime() + hours(driveToShipperHrs));
+    const PTA_SH = new Date(ETA_SH.getTime() + dwell(shipStop));
+
+    const totalDrivingHrs = ((isFinite(dh)?dh:0) + (isFinite(lm)?lm:0)) / v;
+    const breakMs = totalDrivingHrs >= 8 ? minutes(30) : 0;
+
+    const driveToConsHrs = (isFinite(lm)?lm:0) / v;
+    const ETA_CO = new Date(PTA_SH.getTime() + hours(driveToConsHrs) + breakMs);
+
+    const consDwell = dwell(consStop);
+    const afterConsBufferMs = totalDrivingHrs >= 9 ? hours(12) : 0;
+    const PTA_CO = new Date(ETA_CO.getTime() + consDwell + afterConsBufferMs);
+
+    const etaSh = statusClass(ETA_SH, shipAppt);
+    const etaCo = statusClass(ETA_CO, consAppt);
+
+    const payload = {
+      etaSh,
+      ptaSh: PTA_SH,
+      etaCo,
+      ptaCo: PTA_CO,
+      explainSh: explainETA(ETA_SH, shipAppt),
+      explainCo: explainETA(ETA_CO, consAppt, breakMs, afterConsBufferMs, consDwell),
+      meta: {
+        tripId,
+        tripStartISO: tripStart.toISOString(),
+        etaShISO: ETA_SH.toISOString(),
+        ptaCoISO: PTA_CO.toISOString()
+      }
+    };
+
+    showResults(payload);
+
+    // Save to recent trips
+    saveRecentTrip({
+      tripId: payload.meta.tripId,
+      tripStartFmt: fmt(tripStart),
+      etaShFmt: fmt(ETA_SH),
+      ptaCoFmt: fmt(PTA_CO),
+      createdAt: new Date().toISOString()
+    });
+  }
+
+  $('#calc').addEventListener('click', runCalc);
+
+  function resetCalculations(){
+    document.querySelectorAll('input').forEach(el=>{
+      if(el.type==='range'){ el.value=60; mphVal.textContent=60; }
+      else if(el.type==='number' || el.type==='datetime-local' || el.type==='text'){ el.value=''; }
+    });
+    $('#shipperStop').value='DROP30';
+    $('#consStop').value='DROP30';
+    $('#results').style.display='none';
+  }
+
+  $('#reset').addEventListener('click', ()=>{
+    resetCalculations();
+
+    if(window.hosHasActiveDay && window.hosHasActiveDay()){
+      const alsoHos = confirm("Reset HOS clocks (Let’s Roll) as well? \nOK = reset clocks, Cancel = keep clocks running.");
+      if(alsoHos && window.hosResetDay){
+        window.hosResetDay();
+      }
+    }
+  });
+
+  // load recent trips on startup
+  recentTrips = loadRecentTrips();
+  renderRecentTrips();
+
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('sw.js');
   }
+})();
+</script>
+
+<!-- HOS clocks logic -->
+<script>
+(function () {
+  const STORAGE_KEY = "hosClocksState_v1";
+
+  const DUTY_WINDOW_SECONDS = 14 * 3600;
+  const DRIVE_LIMIT_SECONDS = 11 * 3600;
+  const BREAK_LIMIT_SECONDS = 8 * 3600;
+  const MIN_BREAK_SECONDS = 30 * 60;
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        return {
+          dayStart: null,
+          dutyStatus: "OFF",
+          lastStatusChange: null,
+          driveSecondsUsed: 0,
+          onDutySinceBreakSeconds: 0,
+          breakSecondsCurrentStint: 0
+        };
+      }
+      return JSON.parse(raw);
+    } catch (e) {
+      console.error("Failed to load HOS state", e);
+      return {
+        dayStart: null,
+        dutyStatus: "OFF",
+        lastStatusChange: null,
+        driveSecondsUsed: 0,
+        onDutySinceBreakSeconds: 0,
+        breakSecondsCurrentStint: 0
+      };
+    }
+  }
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  let state = loadState();
+
+  function now() {
+    return new Date();
+  }
+
+  function secondsBetween(a, b) {
+    return (b.getTime() - a.getTime()) / 1000;
+  }
+
+  function formatHMS(totalSeconds) {
+    const s = Math.floor(totalSeconds);
+    const clamped = isNaN(s) ? 0 : s;
+    const sign = clamped < 0 ? "-" : "";
+    const abs = Math.abs(clamped);
+    const hours = Math.floor(abs / 3600);
+    const minutes = Math.floor((abs % 3600) / 60);
+    const seconds = abs % 60;
+    return (
+      sign +
+      String(hours).padStart(2, "0") +
+      ":" +
+      String(minutes).padStart(2, "0") +
+      ":" +
+      String(seconds).padStart(2, "0")
+    );
+  }
+
+  function applyStatusAccrual() {
+    if (!state.lastStatusChange) return;
+    const last = new Date(state.lastStatusChange);
+    const current = now();
+    const delta = secondsBetween(last, current);
+    if (delta <= 0) return;
+
+    if (state.dutyStatus === "DRIVING") {
+      state.driveSecondsUsed += delta;
+      state.onDutySinceBreakSeconds += delta;
+    } else if (state.dutyStatus === "ON_DUTY") {
+      state.onDutySinceBreakSeconds += delta;
+    } else if (state.dutyStatus === "BREAK") {
+      state.breakSecondsCurrentStint += delta;
+    }
+
+    state.lastStatusChange = current.toISOString();
+  }
+
+  function setDutyStatus(newStatus) {
+    const current = now();
+
+    if (state.lastStatusChange) {
+      applyStatusAccrual();
+    } else {
+      state.lastStatusChange = current.toISOString();
+    }
+
+    if (state.dutyStatus === "BREAK") {
+      if (state.breakSecondsCurrentStint >= MIN_BREAK_SECONDS) {
+        state.onDutySinceBreakSeconds = 0;
+      }
+      state.breakSecondsCurrentStint = 0;
+    }
+
+    state.dutyStatus = newStatus;
+    state.lastStatusChange = current.toISOString();
+    saveState();
+    updateUI();
+  }
+
+  function startDay() {
+    const current = now();
+
+    if (!state.dayStart) {
+      state.dayStart = current.toISOString();
+    }
+
+    state.dutyStatus = "DRIVING";
+    state.lastStatusChange = current.toISOString();
+    saveState();
+    updateUI();
+  }
+
+  function resetHOS() {
+    state = {
+      dayStart: null,
+      dutyStatus: "OFF",
+      lastStatusChange: null,
+      driveSecondsUsed: 0,
+      onDutySinceBreakSeconds: 0,
+      breakSecondsCurrentStint: 0
+    };
+    saveState();
+    updateUI();
+  }
+
+  const dutyTimeEl = document.getElementById("duty-window-time");
+  const dutyStatusEl = document.getElementById("duty-window-status");
+  const driveTimeEl = document.getElementById("drive-time");
+  const driveStatusEl = document.getElementById("drive-status");
+  const breakTimeEl = document.getElementById("break-clock-time");
+  const breakStatusEl = document.getElementById("break-clock-status");
+
+  const letsRollBtn = document.getElementById("btn-lets-roll");
+  const resetBtn = document.getElementById("btn-reset-hos");
+  const statusButtons = document.querySelectorAll(".hos-status-btn");
+
+  if (letsRollBtn) {
+    letsRollBtn.addEventListener("click", function () {
+      startDay();
+    });
+  }
+
+  if (resetBtn) {
+    resetBtn.addEventListener("click", function () {
+      if (confirm("Reset all HOS clocks? Only do this after a legal 10-hr break.")) {
+        resetHOS();
+      }
+    });
+  }
+
+  statusButtons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      const newStatus = this.getAttribute("data-status");
+      setDutyStatus(newStatus);
+      updateStatusButtons();
+    });
+  });
+
+  function updateStatusButtons() {
+    statusButtons.forEach(function (btn) {
+      const s = btn.getAttribute("data-status");
+      if (s === state.dutyStatus) {
+        btn.classList.add("active");
+      } else {
+        btn.classList.remove("active");
+      }
+    });
+  }
+
+  function updateUI() {
+    applyStatusAccrual();
+
+    const current = now();
+
+    if (!state.dayStart) {
+      dutyTimeEl.textContent = "14:00:00";
+      dutyStatusEl.textContent = "Not started";
+      dutyStatusEl.className = "hos-status";
+    } else {
+      const dayStartDate = new Date(state.dayStart);
+      const dutyElapsed = secondsBetween(dayStartDate, current);
+      const dutyRemaining = DUTY_WINDOW_SECONDS - dutyElapsed;
+
+      dutyTimeEl.textContent = formatHMS(dutyRemaining);
+
+      if (dutyRemaining <= 0) {
+        dutyStatusEl.textContent = "EXPIRED – 14-hr window used";
+        dutyStatusEl.className = "hos-status hos-expired";
+      } else if (dutyRemaining <= 2 * 3600) {
+        dutyStatusEl.textContent = "Warning – less than 2 hrs left";
+        dutyStatusEl.className = "hos-status hos-warning";
+      } else {
+        dutyStatusEl.textContent = "Running";
+        dutyStatusEl.className = "hos-status";
+      }
+    }
+
+    const totalDriveSeconds =
+      state.driveSecondsUsed +
+      (state.dutyStatus === "DRIVING" && state.lastStatusChange
+        ? secondsBetween(new Date(state.lastStatusChange), current)
+        : 0);
+
+    const driveRemaining = DRIVE_LIMIT_SECONDS - totalDriveSeconds;
+    driveTimeEl.textContent = formatHMS(driveRemaining);
+
+    if (!state.dayStart) {
+      driveStatusEl.textContent = "Not started";
+      driveStatusEl.className = "hos-status";
+    } else if (driveRemaining <= 0) {
+      driveStatusEl.textContent = "EXPIRED – 11-hr drive limit";
+      driveStatusEl.className = "hos-status hos-expired";
+    } else if (driveRemaining <= 3600) {
+      driveStatusEl.textContent = "Warning – less than 1 hr drive left";
+      driveStatusEl.className = "hos-status hos-warning";
+    } else {
+      driveStatusEl.textContent =
+        state.dutyStatus === "DRIVING"
+          ? "Running (Driving)"
+          : "Paused (Not Driving)";
+      driveStatusEl.className = "hos-status";
+    }
+
+    const onDutySinceBreakTotal =
+      state.onDutySinceBreakSeconds +
+      ((state.dutyStatus === "DRIVING" || state.dutyStatus === "ON_DUTY") &&
+      state.lastStatusChange
+        ? secondsBetween(new Date(state.lastStatusChange), current)
+        : 0);
+
+    const breakClockRemaining = BREAK_LIMIT_SECONDS - onDutySinceBreakTotal;
+    breakTimeEl.textContent = formatHMS(breakClockRemaining);
+
+    if (!state.dayStart) {
+      breakStatusEl.textContent = "Not started";
+      breakStatusEl.className = "hos-status";
+    } else if (breakClockRemaining <= 0) {
+      breakStatusEl.textContent = "BREAK REQUIRED – 30-min off duty needed";
+      breakStatusEl.className = "hos-status hos-expired";
+    } else if (breakClockRemaining <= 3600) {
+      breakStatusEl.textContent = "Warning – less than 1 hr to 30-min break";
+      breakStatusEl.className = "hos-status hos-warning";
+    } else {
+      if (state.dutyStatus === "BREAK") {
+        if (state.breakSecondsCurrentStint >= MIN_BREAK_SECONDS) {
+          breakStatusEl.textContent = "30-min break completed";
+        } else {
+          const remainingFor30 =
+            MIN_BREAK_SECONDS - state.breakSecondsCurrentStint;
+          breakStatusEl.textContent =
+            "On break – " +
+            formatHMS(remainingFor30) +
+            " to complete 30 mins";
+        }
+      } else {
+        breakStatusEl.textContent =
+          "Running – time until 30-min break required";
+      }
+      breakStatusEl.className = "hos-status";
+    }
+
+    updateStatusButtons();
+    saveState();
+  }
+
+  setInterval(updateUI, 1000);
+  updateUI();
+
+  // expose hooks for Reset button
+  window.hosResetDay = resetHOS;
+  window.hosHasActiveDay = function(){ return !!state.dayStart; };
 })();
 </script>
 </body>
