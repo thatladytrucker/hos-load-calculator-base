@@ -307,8 +307,8 @@
       <div class="hr"></div>
       <div class="note">
         • Auto 30-min rest break is included when total driving ≥ 8h.  
-        • 9/2 rule: when total driving ≥ 9h, PTA after consignee adds +2h buffer +10h rest.  
-        • If total driving > 11h, ETA to consignee includes a 10-hr off-duty reset for the 11-hr rule.  
+        • For long runs (≈450+ miles), PTA after consignee uses a 9/2-style pattern (Day 1 drive, legal off-duty, then Day 2).  
+        • If total driving > 11h on a shorter run, ETA to consignee includes a 10-hr off-duty reset for the 11-hr rule.  
         • Status colors compare ETA against the appointment (on-time ≤60m early = green; >60m early = yellow; ≥1m late = red).
       </div>
       <div class="note" style="margin-top:10px">
@@ -544,7 +544,7 @@
     }
     if(bufferMs){
       const h = Math.round(bufferMs/3600000);
-      parts.push(`+ ${h}h (9/2 rule)`);
+      parts.push(`+ ${h}h buffer (9/2 pattern)`);
     }
     if(appt){
       const diffMin = Math.round((appt - eta)/60000);
@@ -569,33 +569,68 @@
     const totalMiles = (isFinite(dh)?dh:0) + (isFinite(lm)?lm:0);
     $('#total').value = totalMiles;
 
+    // 9/2 rule trigger – mirrors your AppSheet style (450+ miles)
+    const useNineTwoRule = totalMiles >= 450;
+
     if(!tripStart || v<=0){
       showResults(null);
       alert('Enter at least: Trip Start, MPH, and miles.');
       return;
     }
 
+    // --- Shipper leg ---
     const driveToShipperHrs = (isFinite(dh)?dh:0) / v;
     const ETA_SH = new Date(tripStart.getTime() + hours(driveToShipperHrs));
     const PTA_SH = new Date(ETA_SH.getTime() + dwell(shipStop));
 
+    // --- Consignee leg / 9-2 logic ---
     const totalDrivingHrs = ((isFinite(dh)?dh:0) + (isFinite(lm)?lm:0)) / v;
     const breakMs = totalDrivingHrs >= 8 ? minutes(30) : 0;
 
     const driveToConsHrs = (isFinite(lm)?lm:0) / v;
-    let ETA_CO = new Date(PTA_SH.getTime() + hours(driveToConsHrs) + breakMs);
-
     const consDwell = dwell(consStop);
-    let afterConsBufferMs = totalDrivingHrs >= 9 ? hours(12) : 0; // 10h rest + 2h buffer (9/2)
+
+    let ETA_CO;
+    let PTA_CO;
+    let afterConsBufferMs = 0;
     let extraRestMs = 0;
 
-    // If total driving exceeds 11 hours, force a 10-hr off-duty reset
-    if (totalDrivingHrs > 11) {
-      extraRestMs = hours(10);
-      ETA_CO = new Date(ETA_CO.getTime() + extraRestMs);
-    }
+    if (useNineTwoRule) {
+      // 9/2-style pattern for long runs (450+ miles):
+      // Day 1: assume up to 11h drive from trip start
+      // Then 10h off-duty, then finish to consignee on Day 2.
 
-    const PTA_CO = new Date(ETA_CO.getTime() + consDwell + afterConsBufferMs);
+      // End of Day 1 driving window (11h from TRIP START)
+      const endOfDay1 = new Date(tripStart.getTime() + hours(11));
+
+      // Restart after 10h off-duty
+      const restartDay2 = new Date(endOfDay1.getTime() + hours(10));
+
+      // Remaining drive time after the first 11h
+      const remainingDriveHrs = Math.max(0, totalDrivingHrs - 11);
+
+      // ETA to consignee = restartDay2 + remaining drive + any 30m rest
+      ETA_CO = new Date(restartDay2.getTime() + hours(remainingDriveHrs) + breakMs);
+
+      // PTA after consignee = ETA + dwell
+      PTA_CO = new Date(ETA_CO.getTime() + consDwell);
+
+      // If you want an extra 2h buffer baked in, uncomment:
+      // afterConsBufferMs = hours(2);
+      // PTA_CO = new Date(PTA_CO.getTime() + afterConsBufferMs);
+
+    } else {
+      // Normal < 450mi logic (single-day run):
+      ETA_CO = new Date(PTA_SH.getTime() + hours(driveToConsHrs) + breakMs);
+      PTA_CO = new Date(ETA_CO.getTime() + consDwell);
+
+      // If the math says we exceeded 11h total drive, force a 10h reset
+      if (totalDrivingHrs > 11) {
+        extraRestMs = hours(10);
+        ETA_CO = new Date(ETA_CO.getTime() + extraRestMs);
+        PTA_CO = new Date(ETA_CO.getTime() + consDwell);
+      }
+    }
 
     const etaSh = statusClass(ETA_SH, shipAppt);
     const etaCo = statusClass(ETA_CO, consAppt);
