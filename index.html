@@ -175,7 +175,95 @@
     text-transform:uppercase;
     letter-spacing:0.04em;
   }
+<style>
+  :root{
+    --bg:#0b1020;
+    --card:#111936;
+    --ink:#e6ecff;
+    --muted:#96a2c7;
+    --accent:#3b82f6;
+    --ok:#16a34a;
+    --danger:#dc2626;
+    --border:#1e293b;
+  }
+
+  body {
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:system-ui, sans-serif;
+  }
+
+  .container {
+    padding:20px;
+  }
+
+  .card {
+    background:var(--card);
+    border:1px solid var(--border);
+    padding:16px;
+    border-radius:12px;
+    margin-bottom:20px;
+    box-shadow:0 0 20px rgba(0,0,0,0.3);
+  }
+
+  h1,h2,h3,label {
+    color:var(--ink);
+  }
+
+  input, select {
+    width:100%;
+    padding:10px;
+    margin-top:4px;
+    margin-bottom:12px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:#0f172a;
+    color:var(--ink);
+  }
+
+  button {
+    width:100%;
+    padding:14px;
+    margin-top:10px;
+    border:none;
+    border-radius:10px;
+    background:var(--accent);
+    color:white;
+    font-size:16px;
+    font-weight:600;
+  }
+
+  button:active {
+    transform:scale(0.97);
+  }
+
+  .ok {
+    background:var(--ok);
+  }
+
+  .danger {
+    background:var(--danger);
+  }
+
+  .clock-display {
+    font-size:22px;
+    font-weight:700;
+    background:#0f172a;
+    padding:12px;
+    border-radius:10px;
+    text-align:center;
+    margin-bottom:12px;
+    border:1px solid var(--border);
+  }
+
+  .status {
+    color:var(--muted);
+    font-size:14px;
+  }
+
 </style>
+
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
