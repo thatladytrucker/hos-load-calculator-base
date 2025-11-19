@@ -226,13 +226,7 @@
         </div>
       </div>
 
-      <div class="row cols-2">
-        <div>
-          <div class="label">MAX DAILY DRIVE MILES (Safety Rule)</div>
-          <input id="maxDriveMiles" type="number" inputmode="decimal" min="1" value="450" />
-        </div>
-      </div>
-            <div class="hr"></div>
+      <div class="hr"></div>
 
       <div class="row cols-2">
         <div>
@@ -313,7 +307,7 @@
       <div class="hr"></div>
       <div class="note">
         • Auto 30-min rest break is included when total driving ≥ 8h.  
-        • **Safety Rule Applied:** Trip driving time is now limited by the most restrictive of: **FMCSA 11h**, **Safety Rule 9h**, or **Safety Miles / MPH**.
+        • **Safety Rule Applied:** Trip driving time is now limited by the most restrictive of: **FMCSA 11h**, **Safety Rule 9h**, or **Safety Rule 450 miles** at the set MPH.
         • Required off-duty 10-hr resets are added to the ETA based on the limiting factor above.
         • Status colors compare ETA against the appointment (on-time ≤60m early = green; >60m early = yellow; ≥1m late = red).
       </div>
@@ -567,8 +561,10 @@
     const shipStop = $('#shipperStop').value;
     const consStop = $('#consStop').value;
     const tripId = $('#tripId').value || '';
-    // Get the new safety limit for daily miles (default to 450)
-    const maxDriveMiles = parseFloat($('#maxDriveMiles').value||450);
+
+    const MAX_DRIVE_MILES = 450; // Safety rule: Max miles allowed
+    const SAFETY_MAX_DRIVE_HRS = 9; // Safety rule: Max hours allowed
+    const FMCSA_MAX_DRIVE_HRS = 11; // FMCSA legal limit
 
     const totalMiles = (isFinite(dh)?dh:0) + (isFinite(lm)?lm:0);
     $('#total').value = totalMiles;
@@ -587,19 +583,14 @@
     const breakMs = totalDrivingHrs >= 8 ? minutes(30) : 0;
     const consDwell = dwell(consStop);
 
-    // --- HOS and Safety Rule Logic ---
-    const FMCSA_MAX_DRIVE_HRS = 11;
-    const SAFETY_MAX_DRIVE_HRS = 9;
-    const SAFETY_MAX_DRIVE_MILES = maxDriveMiles;
-
     // 1. Determine the effective daily driving limit (the most restrictive of the three)
-    const maxDailyDriveHrsFromSpeed = SAFETY_MAX_DRIVE_MILES / v; 
+    const maxDailyDriveHrsFromMiles = MAX_DRIVE_MILES / v; 
     
-    // Determine the most restrictive limit for one day's drive time in hours
+    // The maximum drive time allowed in one day, enforcing the strictest limit
     const maxDailyDriveHrs = Math.min(
       FMCSA_MAX_DRIVE_HRS, 
       SAFETY_MAX_DRIVE_HRS, 
-      maxDailyDriveHrsFromSpeed
+      maxDailyDriveHrsFromMiles
     );
 
     // 2. Calculate required 10-hour rest breaks
@@ -624,9 +615,7 @@
     ETA_CO = new Date(ETA_CO.getTime() + extraRestMs);
 
     // The 9/2 rule buffer is now simply incorporated into the 10-hr rest period for planning.
-    // We will only use the 2h buffer for the explanation if the old logic was applied, 
-    // but your stricter rule supercedes it.
-    let afterConsBufferMs = totalDrivingHrs >= 9 ? hours(2) : 0; // 2h buffer only
+    let afterConsBufferMs = 0; // Removed the independent 2h buffer as 10hr rest covers it
 
     // 4. Calculate PTA to Consignee (ETA_CO + Dwell + 2h buffer)
     const PTA_CO = new Date(ETA_CO.getTime() + consDwell + afterConsBufferMs);
@@ -643,13 +632,13 @@
     if(extraRestMs > 0){
       const days = requiredBreaks + 1;
       const restHours = requiredBreaks * 10;
-      const breakLabel = requiredBreaks > 1 
-        ? `+ ${restHours}h off-duty (${days} days @ max ${maxDailyDriveHrs.toFixed(1)}h or ${maxDriveMiles}mi per day)` 
+      const breakLabel = requiredBreaks >= 1 
+        ? `+ ${restHours}h off-duty (${days} days @ max ${maxDailyDriveHrs.toFixed(1)}h or ${MAX_DRIVE_MILES}mi per day)` 
         : `+ ${restHours}h off-duty (10-hr rest break)`;
       
       // Prepend the rest break explanation
-      explainCo = explainCo.startsWith('+') 
-        ? breakLabel + ' • ' + explainCo.substring(2)
+      explainCo = explainCo.length > 0
+        ? breakLabel + ' • ' + explainCo
         : breakLabel;
     }
 
@@ -685,8 +674,7 @@
     document.querySelectorAll('input').forEach(el=>{
       if(el.type==='range'){ el.value=60; $('#mphVal').textContent=60; }
       else if(el.type==='number' || el.type==='datetime-local' || el.type==='text'){ 
-        if(el.id === 'maxDriveMiles') el.value='450';
-        else el.value=''; 
+        el.value=''; 
       }
     });
     $('#shipperStop').value='DROP30';
