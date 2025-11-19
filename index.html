@@ -307,8 +307,7 @@
       <div class="hr"></div>
       <div class="note">
         • Auto 30-min rest break is included when total driving ≥ 8h.  
-        • 9/2 rule: when total driving ≥ 9h, PTA after consignee adds +2h buffer +10h rest.  
-        • If total driving > 11h, ETA to consignee includes a 10-hr off-duty reset for the 11-hr rule.  
+        • Long loads use 450 miles / 9-hr safety limit per day (11-hr legal ceiling) with 10-hr resets.  
         • Status colors compare ETA against the appointment (on-time ≤60m early = green; >60m early = yellow; ≥1m late = red).
       </div>
       <div class="note" style="margin-top:10px">
@@ -488,8 +487,6 @@
     });
   }
 
-  // --- Existing UI wiring ---
-
   $('#genId').addEventListener('click', ()=>{
     const now = new Date();
     const stamp = now.toISOString().replace(/\D/g,'').slice(2,12);
@@ -540,11 +537,11 @@
     if(dwellMs) parts.push(`+ ${Math.round(dwellMs/60000)}m dwell`);
     if(extraRestMs){
       const h = Math.round(extraRestMs/3600000);
-      parts.push(`+ ${h}h off-duty (11-hr rule)`);
+      parts.push(`+ ${h}h off-duty resets`);
     }
     if(bufferMs){
       const h = Math.round(bufferMs/3600000);
-      parts.push(`+ ${h}h (9/2 rule)`);
+      parts.push(`+ ${h}h buffer`);
     }
     if(appt){
       const diffMin = Math.round((appt - eta)/60000);
@@ -555,6 +552,7 @@
     return parts.length? parts.join(' • ') : '';
   }
 
+  // === NEW runCalc with 450 miles / 9-hr / multi-day logic ===
   function runCalc(){
     const tripStart = valDate($('#tripStart').value);
     const dh = parseFloat($('#deadhead').value||0);
@@ -575,27 +573,63 @@
       return;
     }
 
+    // --- BASE DRIVE SEGMENTS ---
     const driveToShipperHrs = (isFinite(dh)?dh:0) / v;
     const ETA_SH = new Date(tripStart.getTime() + hours(driveToShipperHrs));
     const PTA_SH = new Date(ETA_SH.getTime() + dwell(shipStop));
 
-    const totalDrivingHrs = ((isFinite(dh)?dh:0) + (isFinite(lm)?lm:0)) / v;
+    // --- SAFETY + MULTI-DAY LOGIC (450 miles OR 9 hours, capped at 11) ---
+
+    const MAX_DRIVE_MILES = 450;      // Safety: max miles per "drive day"
+    const SAFETY_MAX_DRIVE_HRS = 9;   // Safety: max hours per drive day
+    const FMCSA_MAX_DRIVE_HRS = 11;   // Legal ceiling
+
+    const totalDrivingHrs = totalMiles <= 0 ? 0 : (totalMiles / v);
     const breakMs = totalDrivingHrs >= 8 ? minutes(30) : 0;
+    const consDwell = dwell(consStop);
+
+    // Time equivalent of 450 miles at entered MPH
+    const maxDailyDriveHrsFromMiles = MAX_DRIVE_MILES / v;
+
+    // Safety limit that favors the driver (whichever yields more miles)
+    const driverFavorableSafetyLimit = Math.max(
+      SAFETY_MAX_DRIVE_HRS,      // 9 hours
+      maxDailyDriveHrsFromMiles  // time for 450 miles at this speed
+    );
+
+    // Final max drive hours per day, with 11-hr legal cap
+    const maxDailyDriveHrs = Math.min(
+      FMCSA_MAX_DRIVE_HRS,
+      driverFavorableSafetyLimit
+    );
+
+    // How many "driving days" are needed?
+    const requiredDrivingDays = totalDrivingHrs <= 0
+      ? 0
+      : Math.ceil(totalDrivingHrs / maxDailyDriveHrs);
+
+    // Each additional day before the last needs a 10-hr reset
+    const requiredBreaks = Math.max(0, requiredDrivingDays - 1);
+    const extraRestMs = hours(10) * requiredBreaks;
+
+    // --- ETA TO CONSIGNEE WITH MULTI-DAY REST BAKED IN ---
 
     const driveToConsHrs = (isFinite(lm)?lm:0) / v;
-    let ETA_CO = new Date(PTA_SH.getTime() + hours(driveToConsHrs) + breakMs);
 
-    const consDwell = dwell(consStop);
-    let afterConsBufferMs = totalDrivingHrs >= 9 ? hours(12) : 0; // 10h rest + 2h buffer (9/2)
-    let extraRestMs = 0;
+    // Base ETA: PTA after shipper + drive to consignee + 30m break (if needed) + 10-hr resets
+    let ETA_CO = new Date(
+      PTA_SH.getTime()
+      + hours(driveToConsHrs)
+      + breakMs
+      + extraRestMs
+    );
 
-    // If total driving exceeds 11 hours, force a 10-hr off-duty reset
-    if (totalDrivingHrs > 11) {
-      extraRestMs = hours(10);
-      ETA_CO = new Date(ETA_CO.getTime() + extraRestMs);
-    }
+    // 9/2 buffer is handled by HOS clocks; no extra buffer at consignee
+    let afterConsBufferMs = 0;
 
     const PTA_CO = new Date(ETA_CO.getTime() + consDwell + afterConsBufferMs);
+
+    // --- STATUS + EXPLANATION ---
 
     const etaSh = statusClass(ETA_SH, shipAppt);
     const etaCo = statusClass(ETA_CO, consAppt);
@@ -606,12 +640,20 @@
       etaCo,
       ptaCo: PTA_CO,
       explainSh: explainETA(ETA_SH, shipAppt),
-      explainCo: explainETA(ETA_CO, consAppt, breakMs, afterConsBufferMs, consDwell, extraRestMs)
+      explainCo: explainETA(
+        ETA_CO,
+        consAppt,
+        breakMs,
+        afterConsBufferMs,
+        consDwell,
+        extraRestMs
+      )
     };
 
     showResults(payload);
 
-    // Save to recent trips
+    // --- SAVE TO RECENT TRIPS ---
+
     saveRecentTrip({
       tripId,
       tripStartFmt: fmt(tripStart),
