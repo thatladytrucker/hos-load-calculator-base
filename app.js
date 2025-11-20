@@ -1,3 +1,11 @@
+/*
+  © 2025 ArtsnCrabs / Toya Cramsey
+  HOS Load Calculator (PWA Version)
+  All rights reserved.
+
+  This software and all included logic are protected by copyright.
+  Unauthorized reproduction, modification, or distribution is prohibited.
+*/
 // app.js — HOS Load Calculator v6.1a baseline
 
 // ---------- Grab elements ----------
