@@ -1,7 +1,11 @@
-<!-- COPYRIGHT BLOCK -->
-<!doctype html>
-<html>
-...
+/*
+  © 2025 ArtsnCrabs / Toya Cramsey
+  HOS Load Calculator (PWA Version)
+  All rights reserved.
+
+  This software and all included logic are protected by copyright.
+  Unauthorized reproduction, modification, or distribution is prohibited.
+*/
 {
   "name": "TOYA'S HOS LOAD CALCULATOR",
   "short_name": "HOS Calc",
