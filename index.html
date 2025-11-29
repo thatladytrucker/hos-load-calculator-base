@@ -682,6 +682,15 @@
   }
 
   $('#calc').addEventListener('click', runCalc);
+// Validate appointment order BEFORE calculating
+const shipperAppt = new Date(document.getElementById("shipperAppt").value);
+const consigneeAppt = new Date(document.getElementById("consigneeAppt").value);
+
+// Sanity check: delivery must NOT be before pickup
+if (consigneeAppt < shipperAppt) {
+    alert("ERROR: Delivery appointment cannot be before pickup appointment.");
+    return; // Stop calculation
+}
 
   function resetCalculations(){
     document.querySelectorAll('input').forEach(el=>{
