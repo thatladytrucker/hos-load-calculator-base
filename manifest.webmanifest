@@ -1,12 +1,5 @@
-
-  © 2025 ArtsnCrabs / Toya Cramsey
-  HOS Load Calculator (PWA Version)
-  All rights reserved.
-
-  This software and all included logic are protected by copyright.
-  Unauthorized reproduction, modification, or distribution is prohibited.
-
 {
+  "_copyright": "© 2025 ArtsnCrabs / Toya Cramsey. HOS Load Calculator (PWA Version). All rights reserved. Logic protected by copyright.",
   "name": "TOYA'S HOS LOAD CALCULATOR",
   "short_name": "HOS Calc",
   "description": "A simple, dark-mode planner for ETA/PTA and HOS-based arrival estimates.",
