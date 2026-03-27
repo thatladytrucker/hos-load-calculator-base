@@ -10,10 +10,11 @@ const CACHE='hoslc-v1';
 const ASSETS=[
   './',
   'index.html',
+  'app.js',                // <--- Add app.js so your math works offline!
   'manifest.webmanifest',
-  'icons/app-180.png',
-  'icons/app-192.png',
-  'icons/app-512.png'
+  'icons/icon-180.png',    // <--- Changed 'app-' to 'icon-' to match manifest
+  'icons/icon-192.png',
+  'icons/icon-512.png'
 ];
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));
