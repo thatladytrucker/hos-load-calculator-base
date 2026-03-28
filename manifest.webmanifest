@@ -1,17 +1,27 @@
 {
-  "_copyright": "© 2025 ArtsnCrabs / Toya Cramsey. HOS Load Calculator (PWA Version). All rights reserved. Logic protected by copyright.",
-  "name": "TOYA'S HOS LOAD CALCULATOR",
-  "short_name": "HOS Calc",
-  "description": "A simple, dark-mode planner for ETA/PTA and HOS-based arrival estimates.",
-  "start_url": "/",
-  "scope": "/",
+  "background_color": "#0e1628",
+  "dir": "ltr",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "name": "HOS Load Calculator",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "HOS Calc",
+  "start_url": "/",
+  "theme_color": "#0e1628",
   "icons": [
-    { "src": "/icons/icon-180.png", "sizes": "180x180", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
-  ]
+    {
+      "src": "https://hos-load-calculator-base.netlify.app/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://hos-load-calculator-base.netlify.app/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "description": "A reliable tool for truck drivers to calculate and manage Hours of Service (HOS) loads, ensuring compliance and efficient trip planning.",
+  "id": "com.artsncrabs.hosbase"
 }
